@@ -3,37 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Executive Brain Mirror - Voice Enabled</title>
+    <title>Executive Brain Mirror - Demo Ready</title>
     <style>
-        /* --- 既存のスタイル --- */
+        /* --- Base Styles --- */
         :root {
             --bg-color: #F4F7F6;
             --card-bg: #FFFFFF;
             --text-main: #2C3E50;
             --text-sub: #7F8C8D;
             --accent-color: #2980B9;
-            --accent-hover: #3498DB;
-            --record-color: #E74C3C; /* 録音中の赤 */
+            --accent-light: #EAF2F8;
             --border-color: #E0E0E0;
-            --shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 0;
-            line-height: 1.6;
             display: flex;
             justify-content: center;
-            height: 100vh; /* 全画面固定 */
+            height: 100vh;
             overflow: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             background-color: var(--card-bg);
             display: flex;
             flex-direction: column;
@@ -44,138 +40,143 @@
             padding: 15px;
             border-bottom: 1px solid var(--border-color);
             text-align: center;
-            flex-shrink: 0;
+            background: #fff;
         }
-
-        h1 { font-size: 1.1rem; margin: 0; color: var(--text-main); }
+        
+        h1 { font-size: 1.1rem; margin: 0; }
 
         .mode-selector {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             padding: 10px;
             background-color: #f9f9f9;
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
+            border-bottom: 1px solid #eee;
         }
 
         .mode-btn {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            background-color: #fff;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            cursor: pointer;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 20px;
+            font-size: 0.85rem;
             color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.2s;
         }
-
+        
         .mode-btn.active {
-            background-color: var(--accent-color);
+            background: var(--accent-color);
             color: #fff;
             border-color: var(--accent-color);
+            box-shadow: 0 2px 5px rgba(41, 128, 185, 0.2);
         }
 
         #chat-area {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
+            background: #fff;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            background-color: #fff;
-            -webkit-overflow-scrolling: touch;
         }
 
         .message {
             max-width: 85%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 12px;
             font-size: 0.95rem;
-            word-wrap: break-word;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
         }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .message.ai {
-            align-self: flex-start;
-            background-color: #F2F4F8;
-            border-bottom-left-radius: 2px;
-        }
+        .ai { background: #F2F4F8; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user { background: var(--accent-color); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
 
-        .message.user {
-            align-self: flex-end;
-            background-color: var(--accent-color);
-            color: #fff;
-            border-bottom-right-radius: 2px;
-        }
-
-        .input-area {
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
-            background-color: #fff;
+        /* --- 提案チップエリア (新規追加) --- */
+        #suggestion-area {
+            padding: 10px 15px 0 15px;
+            background: #fff;
             display: flex;
-            align-items: center; /* 垂直中央揃え */
-            gap: 10px;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        #suggestion-area::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
             flex-shrink: 0;
-            padding-bottom: max(15px, env(safe-area-inset-bottom)); /* iPhone下部対応 */
+            transition: background 0.2s;
+        }
+        
+        .chip:active { background-color: #D4E6F1; }
+
+        /* 入力エリア */
+        .input-area {
+            padding: 10px 15px 15px 15px; /* 上パディングを減らす */
+            border-top: none; /* チップエリアとの境界を消す */
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        /* --- マイクボタンのスタイル --- */
-        #mic-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 1px solid var(--border-color);
-            background-color: #fff;
-            color: var(--text-sub);
-            cursor: pointer;
+        .voice-guide {
+            font-size: 0.75rem;
+            color: #E67E22;
+            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            transition: all 0.2s;
+            gap: 5px;
+            padding-bottom: 5px;
         }
 
-        #mic-btn.recording {
-            background-color: var(--record-color);
-            color: #fff;
-            border-color: var(--record-color);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
         }
 
         textarea {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border-radius: 8px;
             resize: none;
-            height: 24px; /* 1行分の高さ */
-            font-family: inherit;
-            font-size: 16px; /* iOSでのズーム防止 */
-            outline: none;
+            height: 24px;
+            font-size: 16px;
             line-height: 24px;
             max-height: 100px;
+            font-family: inherit;
         }
+        
+        textarea:focus { border-color: var(--accent-color); outline: none; }
 
         #send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: var(--accent-color);
             color: #fff;
             border: none;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
         }
-        
-        /* SVG Icons */
-        .icon { width: 20px; height: 20px; fill: currentColor; }
 
     </style>
 </head>
@@ -183,7 +184,7 @@
 
 <div class="container">
     <header>
-        <h1>Brain Mirror +Voice</h1>
+        <h1>Executive Brain Mirror</h1>
     </header>
 
     <div class="mode-selector">
@@ -193,97 +194,100 @@
     </div>
 
     <div id="chat-area">
-        <div class="message ai" id="intro-msg">
-            マイクボタンを押して、今の悩みを話しかけてください。<br>
-            散歩中や運転中でも思考を整理します。
         </div>
-    </div>
+
+    <div id="suggestion-area">
+        </div>
 
     <div class="input-area">
-        <button id="mic-btn" onclick="toggleRecording()">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        </button>
-        
-        <textarea id="user-input" placeholder="メッセージを入力..."></textarea>
-        
-        <button id="send-btn" onclick="sendMessage()">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
+        <div class="voice-guide">
+            <span>💡 キーボードの 🎤 で音声入力も可能です</span>
+        </div>
+        <div class="input-wrapper">
+            <textarea id="user-input" placeholder="ここに入力..." rows="1"></textarea>
+            <button id="send-btn" onclick="sendMessage()">送信</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- 音声認識ロジック (Web Speech API) ---
-    const micBtn = document.getElementById('mic-btn');
-    const inputField = document.getElementById('user-input');
-    let recognition = null;
-    let isRecording = false;
+    // --- データ定義: 各モードの「刺さる」例文 ---
+    const SUGGESTIONS = {
+        coach: [
+            "最近、古株の社員が辞めそうで不安だ",
+            "新しい事業アイデアがあるが自信がない",
+            "銀行への返済計画について相談したい",
+            "とにかく頭がモヤモヤしている"
+        ],
+        hiring: [
+            "給料は高くないが、技術は日本一だ",
+            "残業は多いが、独立できる実力がつく",
+            "未経験でもいいから、ガッツがある奴が欲しい",
+            "右腕になってくれる幹部候補が欲しい"
+        ],
+        swot: [
+            "競合他社が値下げを始めて困っている",
+            "円安で仕入れコストが上がっている",
+            "地元の老舗としてのブランド力はある",
+            "若手の採用がまったくうまくいかない"
+        ]
+    };
 
-    // ブラウザ互換性チェック
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        recognition.lang = 'ja-JP';
-        recognition.interimResults = true; // 途中経過を表示
-        recognition.continuous = false;    // 一文ごとに区切るかどうか
+    const INTRO_MESSAGES = {
+        coach: "壁打ちモードです。「社員の離職」や「資金繰り」など、誰にも言えない悩みをタップするか、話しかけてください。",
+        hiring: "求人票モードです。「自社の厳しさ」や「求める人物像」を本音で選んでください。魅力的な言葉に翻訳します。",
+        swot: "SWOTモードです。最近気になっている「競合の動き」や「自社の強み」を選んでみてください。"
+    };
 
-        recognition.onstart = () => {
-            isRecording = true;
-            micBtn.classList.add('recording');
-            inputField.placeholder = "聞いています...";
-        };
-
-        recognition.onend = () => {
-            isRecording = false;
-            micBtn.classList.remove('recording');
-            inputField.placeholder = "メッセージを入力...";
-        };
-
-        recognition.onresult = (event) => {
-            const transcript = Array.from(event.results)
-                .map(result => result[0].transcript)
-                .join('');
-            inputField.value = transcript;
-            // 高さ自動調整
-            inputField.style.height = 'auto';
-            inputField.style.height = inputField.scrollHeight + 'px';
-        };
-
-        recognition.onerror = (event) => {
-            console.error(event.error);
-            isRecording = false;
-            micBtn.classList.remove('recording');
-            alert('音声認識エラー: ' + event.error);
-        };
-    } else {
-        micBtn.style.display = 'none'; // 非対応ブラウザでは隠す
-        console.log("Web Speech API not supported");
-    }
-
-    function toggleRecording() {
-        if (!recognition) return;
-        if (isRecording) {
-            recognition.stop();
-        } else {
-            recognition.start();
-        }
-    }
-
-    // --- チャットロジック (Mock) ---
     let currentMode = 'coach';
-    
-    // 省略：PROMPTSオブジェクトは前のコードと同じ
+    const inputField = document.getElementById('user-input');
+    const chatArea = document.getElementById('chat-area');
+    const suggestionArea = document.getElementById('suggestion-area');
+
+    // 初期化
+    window.onload = () => setMode('coach');
+
+    // テキストエリアの自動伸縮
+    inputField.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
 
     function setMode(mode) {
         currentMode = mode;
+        
+        // ボタンのアクティブ化
         document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
-        document.getElementById('chat-area').innerHTML = '';
-        // モード変更時の初期メッセージを再表示する場合はここで処理
+        
+        // チャットリセット
+        chatArea.innerHTML = '';
+        addMessage('ai', INTRO_MESSAGES[mode]);
+
+        // 例文チップの更新
+        renderSuggestions(mode);
+    }
+
+    function renderSuggestions(mode) {
+        suggestionArea.innerHTML = ''; // クリア
+        SUGGESTIONS[mode].forEach(text => {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.innerText = text;
+            chip.onclick = () => useSuggestion(text);
+            suggestionArea.appendChild(chip);
+        });
+    }
+
+    function useSuggestion(text) {
+        inputField.value = text;
+        inputField.style.height = 'auto'; // 高さ調整
+        inputField.style.height = inputField.scrollHeight + 'px';
+        // オプション: 自動送信したい場合はここで sendMessage() を呼ぶ
+        // sendMessage(); 
     }
 
     function addMessage(sender, text) {
-        const chatArea = document.getElementById('chat-area');
         const div = document.createElement('div');
         div.className = `message ${sender}`;
         div.innerHTML = text.replace(/\n/g, '<br>');
@@ -297,16 +301,20 @@
 
         addMessage('user', text);
         inputField.value = '';
-        inputField.style.height = '24px'; // 高さリセット
+        inputField.style.height = '24px';
 
-        // Mock AI Response
+        // 模擬AI応答 (デモ用)
         setTimeout(() => {
-            let responseText = "なるほど、それについてもう少し詳しく教えてください。";
-            if(currentMode === 'hiring') responseText = `「${text}」という点は、求職者にとって実は魅力になる可能性がありますね。`;
-            if(currentMode === 'swot') responseText = "それは「強み」に分類できそうです。";
-            
-            addMessage('ai', responseText);
-        }, 1000);
+            let response = "";
+            if (currentMode === 'coach') {
+                response = `「${text.substring(0,10)}...」という悩みですね。\n\nでは一つ質問させてください。\nもし明日、その問題が完全に解決したとしたら、あなたの会社の何が一番変わりますか？`;
+            } else if (currentMode === 'hiring') {
+                response = `その「${text}」という本音こそが差別化になります！\n\n【求人キャッチコピー案】\n『${text}。だからこそ、本物のプロになれる環境があります。』\n\nこのように「厳しさ」を「メリット」に変換すると、覚悟のある良い人材だけが集まります。`;
+            } else if (currentMode === 'swot') {
+                response = `なるほど、「${text}」ですね。\n\nSWOT分析の観点では、それは戦略的な「脅威（Threat）」または「強み（Strength）」になります。\n\nこれに対して、現在打てる手は「価格勝負」と「品質特化」のどちらが現実的でしょうか？`;
+            }
+            addMessage('ai', response);
+        }, 800);
     }
 </script>
 </body>
