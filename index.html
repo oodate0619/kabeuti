@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Executive Brain Mirror - Q&A Demo</title>
+  <title>Executive Brain Mirror - Bot Demo</title>
   <style>
     :root{
       --bg:#F4F7F6;
@@ -13,14 +13,13 @@
       --accent:#2980B9;
       --accent-weak:#EAF2F8;
       --warn:#E67E22;
+      --danger:#C0392B;
       --border:#E0E0E0;
       --chip:#EEF6FB;
       --ai:#F2F4F8;
       --shadow: 0 8px 24px rgba(0,0,0,.08);
     }
-
     *{ box-sizing:border-box; }
-
     body{
       font-family:-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       background:var(--bg);
@@ -31,38 +30,35 @@
       justify-content:center;
       overflow:hidden;
     }
-
     .container{
       width:100%;
-      max-width:680px;
+      max-width:720px;
       background:var(--card);
       display:flex;
       flex-direction:column;
       height:100%;
       box-shadow:var(--shadow);
     }
-
     header{
-      padding:14px 16px 10px 16px;
+      padding:14px 14px 10px 14px;
       border-bottom:1px solid var(--border);
       background:#fff;
     }
-
     .top-row{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
     }
-
     h1{ font-size:1.05rem; margin:0; }
 
     .top-actions{
       display:flex;
       gap:8px;
       align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
-
     .small-btn{
       border:1px solid var(--border);
       background:#fff;
@@ -71,6 +67,19 @@
       padding:8px 10px;
       font-size:.82rem;
       cursor:pointer;
+      user-select:none;
+    }
+    .small-btn.primary{
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#fff;
+      font-weight:700;
+    }
+    .small-btn.danger{
+      background:#fff;
+      border-color:#F1C6C2;
+      color:var(--danger);
+      font-weight:700;
     }
     .small-btn:active{ transform:translateY(1px); }
 
@@ -80,7 +89,6 @@
       margin-top:10px;
       flex-wrap:wrap;
     }
-
     .mode-btn{
       padding:8px 14px;
       border:1px solid var(--border);
@@ -92,12 +100,57 @@
       transition:all .2s;
       user-select:none;
     }
-
     .mode-btn.active{
       background:var(--accent);
       color:#fff;
       border-color:var(--accent);
       box-shadow:0 2px 8px rgba(41, 128, 185, 0.18);
+    }
+
+    .subbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 14px;
+      border-bottom:1px solid var(--border);
+      background:#fff;
+    }
+    .toggle{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      color:var(--sub);
+      font-size:.82rem;
+      user-select:none;
+    }
+    .switch{
+      width:44px;
+      height:24px;
+      border-radius:999px;
+      background:#E8EEF4;
+      border:1px solid var(--border);
+      position:relative;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+    .switch::after{
+      content:"";
+      position:absolute;
+      top:2px; left:2px;
+      width:20px; height:20px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.12);
+      transition:all .18s ease;
+    }
+    .switch.on{
+      background:rgba(41,128,185,.18);
+      border-color:rgba(41,128,185,.35);
+    }
+    .switch.on::after{
+      left:22px;
+      background:var(--accent);
     }
 
     #chat-area{
@@ -109,7 +162,6 @@
       flex-direction:column;
       gap:12px;
     }
-
     .message{
       max-width:92%;
       padding:10px 12px;
@@ -119,13 +171,12 @@
       animation:fadeIn .25s ease;
       border:1px solid transparent;
       word-break:break-word;
+      white-space:pre-wrap;
     }
-
     @keyframes fadeIn{
       from{ opacity:0; transform:translateY(6px); }
       to{ opacity:1; transform:translateY(0); }
     }
-
     .ai{
       background:var(--ai);
       align-self:flex-start;
@@ -139,14 +190,6 @@
       border-bottom-right-radius:4px;
       border-color:rgba(255,255,255,.18);
     }
-
-    .meta{
-      font-size:.78rem;
-      color:var(--sub);
-      margin-top:6px;
-      line-height:1.35;
-    }
-
     .typing{
       display:inline-flex;
       align-items:center;
@@ -154,24 +197,20 @@
       color:var(--sub);
       font-size:.85rem;
     }
-    .dots{
-      display:inline-flex;
-      gap:3px;
-    }
+    .dots{ display:inline-flex; gap:3px; }
     .dots span{
       width:6px;height:6px;border-radius:50%;
-      background: #C7CED6;
+      background:#C7CED6;
       display:inline-block;
       animation:bounce 1s infinite;
     }
     .dots span:nth-child(2){ animation-delay:.15s; }
     .dots span:nth-child(3){ animation-delay:.3s; }
     @keyframes bounce{
-      0%, 80%, 100%{ transform:translateY(0); opacity:.6; }
+      0%,80%,100%{ transform:translateY(0); opacity:.6; }
       40%{ transform:translateY(-5px); opacity:1; }
     }
 
-    /* Suggestions / Quick replies */
     #suggestion-area{
       padding:10px 12px 0 12px;
       background:#fff;
@@ -200,7 +239,17 @@
       transition:background .2s, transform .05s;
       user-select:none;
     }
-    .chip:active{ background:#DDEDF8; transform:translateY(1px); }
+    .chip.secondary{
+      background:#FFF7EE;
+      border-color:rgba(230,126,34,.35);
+      color:#B35A06;
+    }
+    .chip.danger{
+      background:#FFF1F0;
+      border-color:rgba(192,57,43,.35);
+      color:var(--danger);
+    }
+    .chip:active{ transform:translateY(1px); }
 
     .input-area{
       padding:10px 12px 14px 12px;
@@ -210,7 +259,6 @@
       gap:8px;
       border-top:1px solid var(--border);
     }
-
     .voice-guide{
       font-size:0.78rem;
       color:var(--warn);
@@ -220,13 +268,11 @@
       justify-content:center;
       gap:6px;
     }
-
     .input-wrapper{
       display:flex;
       gap:10px;
       align-items:flex-end;
     }
-
     textarea{
       flex:1;
       padding:12px;
@@ -241,19 +287,41 @@
     }
     textarea:focus{ border-color:var(--accent); outline:none; }
 
-    #send-btn{
+    .icon-btn{
       width:54px;
+      height:54px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      cursor:pointer;
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      user-select:none;
+    }
+    .icon-btn.mic.on{
+      background:rgba(41,128,185,.12);
+      border-color:rgba(41,128,185,.35);
+      color:var(--accent);
+      font-weight:800;
+    }
+
+    #send-btn{
+      width:70px;
       height:54px;
       border-radius:12px;
       background:var(--accent);
       color:#fff;
       border:none;
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
       flex-shrink:0;
     }
-    #send-btn:disabled{
-      opacity:.6;
+    #send-btn:disabled, .icon-btn:disabled{
+      opacity:.55;
       cursor:not-allowed;
     }
 
@@ -264,7 +332,6 @@
       padding:0 12px 10px 12px;
       background:#fff;
     }
-
     .kbd{
       font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       border:1px solid var(--border);
@@ -275,6 +342,18 @@
       color:var(--text);
       font-size:.78rem;
     }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--sub);
+      font-size:.78rem;
+      user-select:none;
+    }
   </style>
 </head>
 
@@ -284,26 +363,39 @@
       <div class="top-row">
         <h1>Executive Brain Mirror</h1>
         <div class="top-actions">
-          <button class="small-btn" id="export-btn" title="会話をコピー">コピー</button>
-          <button class="small-btn" id="reset-btn" title="このモードを最初から">リセット</button>
+          <span class="badge" id="progress-badge">Step 1/6</span>
+          <button class="small-btn primary" id="demo-run">デモ自動進行</button>
+          <button class="small-btn" id="export-btn">コピー</button>
+          <button class="small-btn danger" id="reset-btn">リセット</button>
         </div>
       </div>
 
-      <div class="mode-selector" role="tablist" aria-label="mode selector">
+      <div class="mode-selector">
         <button class="mode-btn active" data-mode="coach">壁打ち</button>
         <button class="mode-btn" data-mode="hiring">求人票</button>
         <button class="mode-btn" data-mode="swot">SWOT</button>
       </div>
     </header>
 
-    <div id="chat-area" aria-live="polite"></div>
+    <div class="subbar">
+      <div class="toggle">
+        <div class="switch on" id="auto-advance"></div>
+        <div>チップで自動回答→自動進行（デモ向け）</div>
+      </div>
+      <div class="toggle">
+        <div class="switch on" id="auto-summarize"></div>
+        <div>毎回：要約＋盲点＋次の質問</div>
+      </div>
+    </div>
 
+    <div id="chat-area" aria-live="polite"></div>
     <div id="suggestion-area" aria-label="suggestions"></div>
 
     <div class="input-area">
-      <div class="voice-guide"><span>💡 キーボードの 🎤 で音声入力も可能です</span></div>
+      <div class="voice-guide"><span>🎤 マイクで音声入力できます（対応ブラウザのみ）</span></div>
       <div class="input-wrapper">
         <textarea id="user-input" placeholder="ここに入力..." rows="1"></textarea>
+        <button class="icon-btn mic" id="mic-btn" title="音声入力">🎤</button>
         <button id="send-btn">送信</button>
       </div>
     </div>
@@ -314,208 +406,42 @@
   </div>
 
 <script>
-/**
- * 目的：デモでも「一問一答で深掘り」→「整理されたアウトプット」→「次の質問」
- * 注意：外部APIなし。決め打ちのルール/ヒューリスティックで“それっぽい壁打ち”を実現。
- */
+/* =========================================================
+   目的
+   - 触ってバンバン進む“ボット化”体験
+   - チップ=入力例（押すだけで回答が埋まる/送信される）
+   - 最後に「それっぽい構造化アウトプット＋次のアクション」
+   - 音声入力：Web Speech API（SpeechRecognition）
+========================================================= */
 
-/* -----------------------------
-   Suggestion seeds
-------------------------------*/
-const SUGGESTION_SEEDS = {
-  coach: [
-    "古株の社員が辞めそうで不安。どう手を打つべき？",
-    "新規事業アイデアがあるが、勝ち筋があるか見てほしい",
-    "資金繰りが厳しい。返済と投資の優先順位を整理したい",
-    "頭がモヤモヤして判断できない。まず整理してほしい",
-    "今の方針で進んでいいか、穴を指摘してほしい"
-  ],
-  hiring: [
-    "給料は高くないが、技術は本物。刺さる言い方にしたい",
-    "残業は多いが、独立できる実力がつく。正直に書きたい",
-    "未経験OK。ガッツある人だけ欲しい。条件を整えたい",
-    "右腕候補を採りたい。何を訴求すべき？",
-    "採用が全然来ない。原因の仮説と打ち手を出して"
-  ],
-  swot: [
-    "競合が値下げを始めた。どう対抗する？",
-    "円安で仕入れコストが上がっている",
-    "地元の老舗としてのブランドはあるが新規が弱い",
-    "若手の採用が全くうまくいかない",
-    "紹介依存から脱したい。打ち手を整理して"
-  ]
-};
-
-/* -----------------------------
-   “一問一答” 深掘り設計（状態機械）
-------------------------------*/
-const FLOWS = {
-  coach: {
-    name: "壁打ち",
-    intro: [
-      "壁打ちモードです。",
-      "ここでは“慰め”じゃなく、**前提の穴・論理の飛躍・盲点**を潰して、判断できる形に整理します。",
-      "",
-      "まずは状況を1〜3行でOK。話せる範囲で書いてください。"
-    ].join("\n"),
-    steps: [
-      {
-        key: "topic",
-        question: "いま一番困っているテーマは何ですか？（例：採用/離職/資金繰り/新規事業/営業/時間不足）",
-        chips: ["採用", "離職", "資金繰り", "新規事業", "営業", "時間不足"]
-      },
-      {
-        key: "situation",
-        question: "起きている事実を、できるだけ具体的に。いつ・どこで・誰が・何が問題？（5W1Hで箇条書きでもOK）",
-        chips: ["直近1週間の事実を書く", "数字（売上/粗利/人員）を書く", "関係者（誰が）を書く"]
-      },
-      {
-        key: "goal",
-        question: "あなたが“解決”と呼べる状態は何ですか？（定量が理想：例：離職ゼロ/残業-20h/月/粗利+◯%）",
-        chips: ["定量目標にする", "期限を決める", "最低ラインを書く"]
-      },
-      {
-        key: "constraints",
-        question: "制約を教えてください。（時間/お金/権限/機密/社内ルール/人材など）",
-        chips: ["時間がない", "予算がない", "権限が弱い", "機密が多い"]
-      },
-      {
-        key: "options",
-        question: "今考えている打ち手（A案/B案でもOK）を全部出してください。やりたくない案も含めて。",
-        chips: ["A案/B案で出す", "現状維持も案に入れる", "最悪の案も書く"]
-      },
-      {
-        key: "decision",
-        question: "最後に確認。あなたは今、何を“決めたい”ですか？（GO/HOLD/撤退/優先順位/次の一手など）",
-        chips: ["GO判断", "HOLD条件", "撤退基準", "優先順位"]
-      }
-    ]
-  },
-
-  hiring: {
-    name: "求人票",
-    intro: [
-      "求人票モードです。",
-      "**“盛る”より“刺さる正直さ”**を作ります。ミスマッチは減らし、応募の質を上げる設計です。",
-      "",
-      "まずは募集職種を教えてください。"
-    ].join("\n"),
-    steps: [
-      {
-        key: "role",
-        question: "募集職種は？（例：現場作業/営業/事務/マネージャー/幹部候補）",
-        chips: ["現場", "営業", "事務", "マネージャー", "幹部候補"]
-      },
-      {
-        key: "must",
-        question: "この人ができないと困る“必須業務”を3つだけ。（抽象NG：例：見積作成/顧客フォロー/現場段取り）",
-        chips: ["必須業務を3つ", "“できる”で書く", "道具/環境も書く"]
-      },
-      {
-        key: "nice",
-        question: "できたら嬉しい“あれば強い”要素は？（経験/資格/性格/価値観）",
-        chips: ["経験", "資格", "性格", "価値観"]
-      },
-      {
-        key: "hardtruth",
-        question: "正直に書くべき“キツい現実”は？（残業/泥臭さ/責任/クレーム/体力など）",
-        chips: ["残業", "責任重い", "クレーム", "体力", "泥臭い"]
-      },
-      {
-        key: "reward",
-        question: "代わりに得られる“報酬”は？（金/成長/裁量/独立/技術/仲間）",
-        chips: ["成長", "裁量", "技術", "独立", "仲間"]
-      },
-      {
-        key: "screen",
-        question: "避けたい人（ミスマッチ）を明確に。NG行動/価値観を3つ。",
-        chips: ["指示待ち", "言い訳が多い", "責任回避", "継続しない"]
-      }
-    ]
-  },
-
-  swot: {
-    name: "SWOT",
-    intro: [
-      "SWOTモードです。",
-      "“それっぽいSWOT”じゃなく、**次の一手に直結**する形に落とします。",
-      "",
-      "まず、あなたの事業（業種/顧客/単価/主力商品）を1〜3行で教えてください。"
-    ].join("\n"),
-    steps: [
-      {
-        key: "biz",
-        question: "事業の概要を教えてください。（誰に/何を/いくらで/どう売っている？）",
-        chips: ["誰に", "何を", "いくら", "どう売る"]
-      },
-      {
-        key: "strength",
-        question: "強み（S）：証拠つきで3つ。（例：リピ率◯%/紹介比率◯%/対応速度/技術）",
-        chips: ["数字で書く", "顧客の声", "競合比較"]
-      },
-      {
-        key: "weakness",
-        question: "弱み（W）：認めたくないやつほど価値あり。3つ。（例：属人化/原価/採用/広告弱い）",
-        chips: ["属人化", "利益薄い", "採用弱い", "広告弱い"]
-      },
-      {
-        key: "opportunity",
-        question: "機会（O）：外部変化で追い風は？（市場/法規制/技術/競合の穴）",
-        chips: ["市場の変化", "技術", "競合の穴", "新チャネル"]
-      },
-      {
-        key: "threat",
-        question: "脅威（T）：無視すると死ぬやつは？（値下げ/原価/人材/規制）",
-        chips: ["値下げ", "原価高騰", "人材不足", "規制"]
-      },
-      {
-        key: "choice",
-        question: "最後に、あなたが次の30日で動かせるリソースは？（時間/予算/人）",
-        chips: ["週◯時間", "予算◯円", "担当者◯人"]
-      }
-    ]
-  }
-};
-
-/* -----------------------------
-   UI refs
-------------------------------*/
+/* ---------- UI refs ---------- */
 const inputField = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
+const micBtn = document.getElementById("mic-btn");
 const chatArea = document.getElementById("chat-area");
 const suggestionArea = document.getElementById("suggestion-area");
 const resetBtn = document.getElementById("reset-btn");
 const exportBtn = document.getElementById("export-btn");
+const demoRunBtn = document.getElementById("demo-run");
+const progressBadge = document.getElementById("progress-badge");
 
-/* -----------------------------
-   Conversation State
-------------------------------*/
-let currentMode = "coach";
-let stateByMode = createInitialState();
+const autoAdvanceSwitch = document.getElementById("auto-advance");
+const autoSummarizeSwitch = document.getElementById("auto-summarize");
 
-function createInitialState(){
-  const obj = {};
-  Object.keys(FLOWS).forEach(mode=>{
-    obj[mode] = {
-      stepIndex: 0,
-      answers: {},
-      transcript: [] // {role:'user'|'ai', text:string}
-    };
-  });
-  return obj;
-}
+/* ---------- switches state ---------- */
+let AUTO_ADVANCE = true;
+let AUTO_SUMMARIZE = true;
 
-function getState(){
-  return stateByMode[currentMode];
-}
+autoAdvanceSwitch.addEventListener("click", ()=>{
+  AUTO_ADVANCE = !AUTO_ADVANCE;
+  autoAdvanceSwitch.classList.toggle("on", AUTO_ADVANCE);
+});
+autoSummarizeSwitch.addEventListener("click", ()=>{
+  AUTO_SUMMARIZE = !AUTO_SUMMARIZE;
+  autoSummarizeSwitch.classList.toggle("on", AUTO_SUMMARIZE);
+});
 
-function resetMode(mode){
-  stateByMode[mode] = { stepIndex: 0, answers:{}, transcript: [] };
-}
-
-/* -----------------------------
-   Helpers: sanitize + render
-------------------------------*/
+/* ---------- utilities ---------- */
 function escapeHtml(str){
   return str
     .replaceAll("&","&amp;")
@@ -524,18 +450,14 @@ function escapeHtml(str){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-
 function addMessage(sender, text){
   const div = document.createElement("div");
   div.className = `message ${sender}`;
-  div.innerHTML = escapeHtml(text).replace(/\n/g,"<br>");
+  div.innerHTML = escapeHtml(text);
   chatArea.appendChild(div);
   chatArea.scrollTop = chatArea.scrollHeight;
-
-  // store transcript
   getState().transcript.push({ role: sender === "ai" ? "ai" : "user", text });
 }
-
 function addTyping(){
   const div = document.createElement("div");
   div.className = "message ai";
@@ -546,25 +468,33 @@ function addTyping(){
   chatArea.appendChild(div);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
-
 function removeTyping(){
   const t = chatArea.querySelector('[data-typing="1"]');
   if(t) t.remove();
 }
-
-function setInputDisabled(disabled){
+function normalize(text){
+  return (text || "").trim().replace(/\s+/g, " ");
+}
+function truncate(str, n){
+  if(!str) return "";
+  const s = String(str).trim();
+  return s.length > n ? s.slice(0, n) + "…" : s;
+}
+function extractNumbers(text){
+  const nums = (text || "").match(/-?\d+(\.\d+)?/g);
+  return nums ? nums.map(n => Number(n)) : [];
+}
+function setDisabled(disabled){
   sendBtn.disabled = disabled;
+  micBtn.disabled = disabled;
   inputField.disabled = disabled;
 }
 
-/* -----------------------------
-   Textarea autosize + keybinds
-------------------------------*/
+/* ---------- textarea autosize + keybinds ---------- */
 inputField.addEventListener("input", function(){
   this.style.height = "auto";
   this.style.height = (this.scrollHeight) + "px";
 });
-
 inputField.addEventListener("keydown", (e)=>{
   if(e.key === "Enter" && !e.shiftKey){
     e.preventDefault();
@@ -572,9 +502,730 @@ inputField.addEventListener("keydown", (e)=>{
   }
 });
 
-/* -----------------------------
+/* =========================================================
+   Bot flow definitions (デモ重視)
+   - “質問→回答→小さな整理→次質問”
+   - 各質問に「デモ回答チップ」を複数用意
+========================================================= */
+const FLOWS = {
+  coach: {
+    name: "壁打ち",
+    intro: [
+      "壁打ちモードです。",
+      "押すだけで進むデモにしてあります（チップ＝入力例）。",
+      "",
+      "まずはテーマから。"
+    ].join("\n"),
+    steps: [
+      {
+        key: "topic",
+        question: "テーマはどれ？（押すだけでOK）",
+        demoChips: [
+          { label:"離職が怖い", value:"離職（古株が辞めそう）" },
+          { label:"資金繰りが厳しい", value:"資金繰り（返済と支払いが詰まってきた）" },
+          { label:"新規事業アイデア", value:"新規事業（勝ち筋を見たい）" },
+          { label:"営業が伸びない", value:"営業（提案→受注が落ちた）" }
+        ]
+      },
+      {
+        key: "facts",
+        question: "直近1週間の“事実”を選んで。複数押してOK（最後に「送信」でもOK）。",
+        multiSelect: true,
+        demoChips: [
+          { label:"退職の匂い", value:"古株が『今後を考えたい』と言い出した" },
+          { label:"生産性低下", value:"手戻りが増え、残業が週+6h増えた" },
+          { label:"売上減", value:"先月売上が前月比 -12% になった" },
+          { label:"資金ショート不安", value:"支払い予定が重なり、月末が怖い" },
+          { label:"競合が攻勢", value:"競合が値下げ/広告強化してきた" }
+        ]
+      },
+      {
+        key: "goal",
+        question: "“解決”の定義を選んで（数字があると一気にそれっぽくなる）。",
+        demoChips: [
+          { label:"離職ゼロ", value:"今後90日で主要メンバーの離職ゼロ" },
+          { label:"残業-20%", value:"30日で残業を20%削減（週次で測る）" },
+          { label:"粗利+10%", value:"60日で粗利を+10%（値引きを止める）" },
+          { label:"資金余裕", value:"月末残高の最低ラインを+100万円確保" }
+        ]
+      },
+      {
+        key: "constraints",
+        question: "制約を選んで。現実に寄せるほど、提案の質が上がる。",
+        demoChips: [
+          { label:"時間がない", value:"社長の稼働が限界（週2時間しか捻出できない）" },
+          { label:"お金がない", value:"追加投資できない（広告/採用に大金は出せない）" },
+          { label:"権限が弱い", value:"現場が反発しやすい（ルール変更が通りにくい）" },
+          { label:"機密が多い", value:"顧客情報・契約情報は入力できない" }
+        ]
+      },
+      {
+        key: "options",
+        question: "今考えてる打ち手を選んで（“やりたくない案”も押すと強い）。",
+        demoChips: [
+          { label:"面談で引き止め", value:"古株と1on1して不満/条件を棚卸しする" },
+          { label:"業務整理", value:"手戻り原因を特定しテンプレ/チェックリスト化" },
+          { label:"商品を絞る", value:"利益が薄い商品を一旦止めて集中する" },
+          { label:"値上げ", value:"値引きを止め、価格を見直す" },
+          { label:"採用は後回し", value:"採用は一旦止め、既存メンバーの定着を優先する" }
+        ]
+      },
+      {
+        key: "decision",
+        question: "最後に、何を決めたい？（押すだけ）",
+        demoChips: [
+          { label:"GO条件", value:"この方向でGOしていい条件を決めたい" },
+          { label:"HOLD条件", value:"条件付きで進める（HOLD条件を決めたい）" },
+          { label:"撤退ライン", value:"撤退/中止の基準を決めたい" },
+          { label:"次の一手", value:"最初の1週間の行動を決めたい" }
+        ]
+      }
+    ]
+  },
+
+  hiring: {
+    name: "求人票",
+    intro: "求人票モードです。押すだけで“それっぽい求人原稿”まで出ます。",
+    steps: [
+      { key:"role", question:"募集職種は？", demoChips:[
+        {label:"営業", value:"営業（法人）"},
+        {label:"現場", value:"現場スタッフ"},
+        {label:"事務", value:"事務（サポート）"},
+        {label:"幹部候補", value:"幹部候補（右腕）"}
+      ]},
+      { key:"must", question:"必須業務（3つ）の例を押して。", demoChips:[
+        {label:"見積/提案", value:"見積作成と提案資料の作成"},
+        {label:"顧客フォロー", value:"既存顧客へのフォロー（連絡・調整）"},
+        {label:"現場段取り", value:"現場段取り（スケジュール/人/資材）"},
+        {label:"数字管理", value:"KPIの記録と週次レビュー"}
+      ]},
+      { key:"hardtruth", question:"キツい現実を押して（隠すとミスマッチ増）。", demoChips:[
+        {label:"残業あり", value:"繁忙期は残業が出る（波がある）"},
+        {label:"泥臭い", value:"綺麗な仕事だけではない（泥臭い対応もある）"},
+        {label:"責任重い", value:"任せる範囲が広く責任も大きい"},
+        {label:"スピード必須", value:"レスが遅いと回らない（スピード重視）"}
+      ]},
+      { key:"reward", question:"代わりに得られるものを押して。", demoChips:[
+        {label:"裁量", value:"裁量が大きい（任される範囲が広い）"},
+        {label:"技術", value:"本物の技術が身につく（実務で鍛える）"},
+        {label:"成長", value:"成長環境（フィードバックが速い）"},
+        {label:"独立", value:"独立できるレベルの実力がつく"}
+      ]},
+      { key:"screen", question:"避けたい人（NG）を押して。", demoChips:[
+        {label:"指示待ち", value:"指示待ちで動けない人"},
+        {label:"言い訳", value:"言い訳が多く改善しない人"},
+        {label:"他責", value:"問題を他人のせいにする人"},
+        {label:"継続しない", value:"継続が苦手で途中で投げる人"}
+      ]}
+    ]
+  },
+
+  swot: {
+    name: "SWOT",
+    intro: "SWOTモードです。入力を押す→最後に30日プランを出します。",
+    steps: [
+      { key:"biz", question:"事業概要を押して（例）。", demoChips:[
+        {label:"BtoB支援", value:"中小企業向けに業務改善/AI導入の伴走支援。月額契約。"},
+        {label:"店舗", value:"地域密着の店舗ビジネス。紹介比率が高い。"},
+        {label:"制作", value:"Web制作/運用代行。継続契約の比率を上げたい。"},
+        {label:"スクール", value:"個人向け講座。集客→面談→成約が課題。"}
+      ]},
+      { key:"strength", question:"強み（S）を押して。", demoChips:[
+        {label:"実績", value:"顧客の成果事例がある（数字で語れる）"},
+        {label:"スピード", value:"対応が速い（即レス・即改善）"},
+        {label:"専門性", value:"特定領域に深い（競合が薄い）"},
+        {label:"紹介", value:"紹介が多い（信頼が強い）"}
+      ]},
+      { key:"weakness", question:"弱み（W）を押して。", demoChips:[
+        {label:"属人化", value:"社長/特定メンバーに属人化している"},
+        {label:"採用", value:"採用が弱い（人が増えない）"},
+        {label:"粗利", value:"値引きで粗利が削れている"},
+        {label:"集客", value:"新規集客が安定しない"}
+      ]},
+      { key:"opportunity", question:"機会（O）を押して。", demoChips:[
+        {label:"AI需要", value:"生成AI活用の需要が増えている"},
+        {label:"規制/補助", value:"補助金/制度で投資が動きやすい"},
+        {label:"競合の穴", value:"競合が運用/定着まで見れていない"},
+        {label:"新チャネル", value:"新チャネル（SNS/紹介提携）が伸びている"}
+      ]},
+      { key:"threat", question:"脅威（T）を押して。", demoChips:[
+        {label:"値下げ", value:"競合が値下げで奪いに来る"},
+        {label:"原価", value:"原価/外注費が上がって利益が減る"},
+        {label:"人材", value:"人材流動で採用競争が激しい"},
+        {label:"景気", value:"景気悪化で意思決定が遅くなる"}
+      ]},
+      { key:"choice", question:"30日で動かせるリソースを押して。", demoChips:[
+        {label:"週3時間", value:"週3時間＋予算0〜3万円"},
+        {label:"週8時間", value:"週8時間＋予算5〜10万円"},
+        {label:"担当1人", value:"担当者1人（社長は週1時間のみ）"},
+        {label:"チーム", value:"チーム2人で週合計10時間"}
+      ]}
+    ]
+  }
+};
+
+/* ---------- demo scenarios (ワンクリック自動進行) ---------- */
+const DEMO_SCENARIOS = {
+  coach: [
+    "離職（古株が辞めそう）",
+    "古株が『今後を考えたい』と言い出した / 手戻りが増え、残業が週+6h増えた",
+    "今後90日で主要メンバーの離職ゼロ",
+    "社長の稼働が限界（週2時間しか捻出できない）",
+    "古株と1on1して不満/条件を棚卸しする / 手戻り原因を特定しテンプレ/チェックリスト化",
+    "最初の1週間の行動を決めたい"
+  ],
+  hiring: [
+    "幹部候補（右腕）",
+    "見積作成と提案資料の作成 / KPIの記録と週次レビュー / 既存顧客へのフォロー（連絡・調整）",
+    "任せる範囲が広く責任も大きい",
+    "裁量が大きい（任される範囲が広い）",
+    "指示待ちで動けない人 / 問題を他人のせいにする人"
+  ],
+  swot: [
+    "中小企業向けに業務改善/AI導入の伴走支援。月額契約。",
+    "顧客の成果事例がある（数字で語れる） / 対応が速い（即レス・即改善）",
+    "社長/特定メンバーに属人化している / 新規集客が安定しない",
+    "生成AI活用の需要が増えている / 競合が運用/定着まで見れていない",
+    "競合が値下げで奪いに来る",
+    "担当者1人（社長は週1時間のみ）"
+  ]
+};
+
+/* =========================================================
+   Conversation state
+========================================================= */
+let currentMode = "coach";
+let stateByMode = initStates();
+
+function initStates(){
+  const obj = {};
+  Object.keys(FLOWS).forEach(mode=>{
+    obj[mode] = { stepIndex:0, answers:{}, transcript:[] };
+  });
+  return obj;
+}
+function getState(){ return stateByMode[currentMode]; }
+function resetMode(mode){
+  stateByMode[mode] = { stepIndex:0, answers:{}, transcript:[] };
+}
+
+/* ---------- progress badge ---------- */
+function updateProgress(){
+  const flow = FLOWS[currentMode];
+  const st = getState();
+  const total = flow.steps.length;
+  const cur = Math.min(st.stepIndex + 1, total);
+  progressBadge.textContent = `Step ${cur}/${total}`;
+}
+
+/* =========================================================
+   Suggestions rendering
+   - demoChips: 押したら自動入力
+   - multiSelect: 複数押せる（facts向け）
+========================================================= */
+function renderSuggestions(){
+  suggestionArea.innerHTML = "";
+
+  const flow = FLOWS[currentMode];
+  const st = getState();
+  const step = flow.steps[st.stepIndex];
+
+  // completion state
+  if(!step){
+    const chips = [
+      {label:"まとめ（結論＋次アクション）", value:"まとめて", cls:"secondary"},
+      {label:"別角度で穴出し", value:"穴だけ列挙して", cls:"danger"},
+      {label:"A案/B案比較", value:"A案B案で比較して", cls:"secondary"}
+    ];
+    chips.forEach(c=>makeChip(c));
+    return;
+  }
+
+  // if multiSelect: provide helper controls
+  if(step.multiSelect){
+    makeChip({label:"（押した分を送信）", value:"__SEND__", cls:"secondary"});
+    makeChip({label:"（クリア）", value:"__CLEAR__", cls:"danger"});
+  }
+
+  (step.demoChips || []).forEach(c=>{
+    makeChip({label:c.label, value:c.value});
+  });
+}
+
+function makeChip({label, value, cls}){
+  const chip = document.createElement("div");
+  chip.className = "chip" + (cls ? " " + cls : "");
+  chip.textContent = label;
+  chip.onclick = ()=> onChip(value);
+  suggestionArea.appendChild(chip);
+}
+
+function onChip(value){
+  const flow = FLOWS[currentMode];
+  const st = getState();
+  const step = flow.steps[st.stepIndex];
+
+  // special controls
+  if(value === "__CLEAR__"){
+    inputField.value = "";
+    inputField.style.height = "44px";
+    return;
+  }
+  if(value === "__SEND__"){
+    sendMessage();
+    return;
+  }
+
+  if(step && step.multiSelect){
+    // append with delimiter
+    const cur = inputField.value.trim();
+    inputField.value = cur ? (cur + " / " + value) : value;
+    inputField.dispatchEvent(new Event("input"));
+    if(AUTO_ADVANCE){
+      // allow user to press multiple; auto-advance only if they click 2+? -> no.
+      // Keep here: do nothing. They can tap SEND chip or Send button.
+      inputField.focus();
+    }
+    return;
+  }
+
+  // single select: set and auto-send
+  inputField.value = value;
+  inputField.dispatchEvent(new Event("input"));
+
+  if(AUTO_ADVANCE){
+    sendMessage();
+  }else{
+    inputField.focus();
+  }
+}
+
+/* =========================================================
+   Speech Recognition (音声入力)
+========================================================= */
+let recognition = null;
+let isRecording = false;
+
+function setupSpeech(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    micBtn.disabled = true;
+    micBtn.title = "このブラウザは音声入力に非対応です";
+    micBtn.textContent = "🎤×";
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = "ja-JP";
+  recognition.interimResults = true;
+  recognition.continuous = true;
+
+  recognition.onresult = (event)=>{
+    let finalText = "";
+    let interimText = "";
+    for(let i=event.resultIndex; i<event.results.length; i++){
+      const transcript = event.results[i][0].transcript;
+      if(event.results[i].isFinal) finalText += transcript;
+      else interimText += transcript;
+    }
+    // reflect into textarea (final + interim)
+    const base = inputField.value.replace(/（音声入力中：.*）$/,"").trim();
+    const merged = (base ? base + " " : "") + finalText + (interimText ? `（音声入力中：${interimText}）` : "");
+    inputField.value = merged.trim();
+    inputField.dispatchEvent(new Event("input"));
+  };
+
+  recognition.onerror = (e)=>{
+    stopRecording();
+    addMessage("ai", "音声入力でエラーが出ました。ブラウザ権限（マイク許可）を確認してください。");
+  };
+
+  recognition.onend = ()=>{
+    // when ended unexpectedly
+    if(isRecording){
+      // some browsers stop automatically; keep off
+      stopRecording();
+    }
+  };
+}
+
+function startRecording(){
+  if(!recognition) return;
+  isRecording = true;
+  micBtn.classList.add("on");
+  micBtn.textContent = "●";
+  micBtn.title = "録音中（停止するにはクリック）";
+  try{
+    recognition.start();
+  }catch(e){
+    // calling start twice can throw
+  }
+}
+
+function stopRecording(){
+  if(!recognition) return;
+  isRecording = false;
+  micBtn.classList.remove("on");
+  micBtn.textContent = "🎤";
+  micBtn.title = "音声入力";
+  try{
+    recognition.stop();
+  }catch(e){}
+  // cleanup interim tag
+  inputField.value = inputField.value.replace(/（音声入力中：.*）$/,"").trim();
+  inputField.dispatchEvent(new Event("input"));
+}
+
+micBtn.addEventListener("click", ()=>{
+  if(!recognition) return;
+  if(isRecording) stopRecording();
+  else startRecording();
+});
+
+/* =========================================================
+   Bot brain
+========================================================= */
+function qualityGateHints(mode){
+  if(mode === "coach"){
+    return [
+      "・事実と解釈を分ける（推測が混ざると誤射する）",
+      "・目標が数字でないとGO判断がブレる",
+      "・制約（時間/人/金/権限）に噛む打ち手だけ残す"
+    ].join("\n");
+  }
+  if(mode === "hiring"){
+    return [
+      "・必須業務が曖昧だと採っても失敗しやすい",
+      "・厳しさは隠すほど早期離職コストが増える",
+      "・NG人材を明文化すると応募の質が上がる"
+    ].join("\n");
+  }
+  return [
+    "・S/Wは内側、O/Tは外側（混ぜると崩れる）",
+    "・30日で動かせるリソースが無いなら“優先順位”が先",
+    "・SWOTは打ち手に落とした時点で完成"
+  ].join("\n");
+}
+
+function buildCoachResponse(){
+  const a = getState().answers;
+  const summary = [
+    a.topic ? `・テーマ：${a.topic}` : null,
+    a.facts ? `・直近の事実：${truncate(a.facts, 140)}` : null,
+    a.goal ? `・解決定義：${truncate(a.goal, 120)}` : null,
+    a.constraints ? `・制約：${truncate(a.constraints, 120)}` : null,
+    a.options ? `・打ち手候補：${truncate(a.options, 120)}` : null,
+    a.decision ? `・決めたいこと：${truncate(a.decision, 120)}` : null
+  ].filter(Boolean).join("\n") || "・（まだ材料が薄い）";
+
+  const good = [];
+  if(a.goal && extractNumbers(a.goal).length) good.push("・目標に数字がある → 行動の優先順位が決めやすい");
+  if(a.constraints) good.push("・制約が出ている → 現実に噛む提案ができる");
+  if(!good.length) good.push("・デモとして必要な材料が揃ってきている（あと少しで結論が出せる）");
+
+  const bad = [];
+  if(a.goal && !extractNumbers(a.goal).length) bad.push("・目標が定量化されてない → “やった気”で終わるリスク");
+  if(a.facts && /たぶん|気がする|かも/.test(a.facts)) bad.push("・推測が混ざる → 対策がズレる（誤射の機会損失）");
+  if(a.options && a.constraints && /週\d|時間がない|予算/.test(a.constraints) && /全部|刷新|大規模|開発/.test(a.options)){
+    bad.push("・制約と打ち手が噛んでない可能性 → 実行できず自然消滅");
+  }
+  if(!bad.length) bad.push("・致命傷は未確定。最終出力で“GO条件/撤退ライン”を明文化するのが肝。");
+
+  const blind = [];
+  if(a.topic && a.topic.includes("離職")){
+    blind.push("・原因が待遇/評価/将来不安/人間関係のどれかで打ち手が逆になる");
+    blind.push("・引き止めの可否（何を変えれば残るか）を早めに確認しないと手遅れになる");
+  }else if(a.topic && a.topic.includes("資金繰り")){
+    blind.push("・売上より“粗利と回収サイト”が資金を殺すケースが多い");
+    blind.push("・ショート期限（何日後に詰むか）を出せないと対策優先順位が作れない");
+  }else if(a.topic && a.topic.includes("新規事業")){
+    blind.push("・アイデアより先に“誰が払うか（Payer）”と“継続理由”が要る");
+    blind.push("・検証指標が無いと、永遠に実験が終わらない");
+  }else{
+    blind.push("・悩みが原因ではなく症状の可能性：根因が別にあると再発する");
+  }
+
+  return [
+    "了解。いまの入力を“判断できる形”に寄せます。",
+    "",
+    "【要約＋前提整理】",
+    summary,
+    "",
+    "【良い点】",
+    good.join("\n"),
+    "",
+    "【問題点・リスク】",
+    bad.join("\n"),
+    "",
+    "【盲点】",
+    blind.join("\n")
+  ].join("\n");
+}
+
+function buildHiringResponse(){
+  const a = getState().answers;
+  const draft = [
+    `【募集】${a.role || "（職種未確定）"}`,
+    "",
+    "【一言】",
+    a.hardtruth ? `正直に言うと、${truncate(a.hardtruth, 80)}。その分、${truncate(a.reward || "成長と裁量", 60)}が得られます。` : "（厳しさ→価値への翻訳を作ります）",
+    "",
+    "【仕事内容（必須）】",
+    a.must ? "・" + a.must.split("/").map(s=>s.trim()).filter(Boolean).join("\n・") : "・（必須業務を3つ）",
+    "",
+    "【向いていない人】",
+    a.screen ? "・" + a.screen.split("/").map(s=>s.trim()).filter(Boolean).join("\n・") : "・（NGを3つ）",
+  ].join("\n");
+
+  return [
+    "OK。押した内容を求人原稿に落とします（盛らない）。",
+    "",
+    "【チェック観点】",
+    qualityGateHints("hiring"),
+    "",
+    "【ドラフト（仮）】",
+    draft
+  ].join("\n");
+}
+
+function buildSwotResponse(){
+  const a = getState().answers;
+  const actions = [];
+  if(a.strength && a.opportunity) actions.push("① S×O：強みを露出させる導線を1つ作る（提案資料/LP/投稿のどれか）");
+  if(a.weakness && a.opportunity) actions.push("② W×O：弱みは外注/テンプレ化で補い、機会を取りに行く");
+  if(a.strength && a.threat) actions.push("③ S×T：守りラインを明文化（値下げに付き合わない条件）");
+  if(a.weakness && a.threat) actions.push("④ W×T：死に筋を切る（撤退/縮小）");
+
+  const plan = a.choice ? [
+    "",
+    "【30日プラン（仮）】",
+    `・リソース：${a.choice}`,
+    "・Week1：勝てる訴求を1つに絞る（成果事例/顧客の声を棚卸し）",
+    "・Week2：訴求を“1つの資産”に変換（LP/提案資料/投稿のどれか）",
+    "・Week3：小さく出す（10件提案/3本投稿/既存客案内）",
+    "・Week4：数字で残す/捨てる（伸びた型だけ残す）"
+  ].join("\n") : "\n\n※リソース未確定だとSWOTが作文で終わります。";
+
+  return [
+    "了解。SWOTを“次の一手”に直結させます。",
+    "",
+    "【要約】",
+    [
+      a.biz ? `・事業：${truncate(a.biz, 140)}` : null,
+      a.strength ? `・S：${truncate(a.strength, 120)}` : null,
+      a.weakness ? `・W：${truncate(a.weakness, 120)}` : null,
+      a.opportunity ? `・O：${truncate(a.opportunity, 120)}` : null,
+      a.threat ? `・T：${truncate(a.threat, 120)}` : null,
+    ].filter(Boolean).join("\n") || "・（まだ材料が薄い）",
+    "",
+    "【打ち手（仮）】",
+    (actions.length ? actions.join("\n") : "・（S/W/O/Tの材料がもう少し必要）") + plan
+  ].join("\n");
+}
+
+function buildFinalOutput(){
+  const mode = currentMode;
+  const a = getState().answers;
+
+  if(mode === "coach"){
+    const go = [
+      "【結論（仮）】",
+      "今の材料だと“GO/HOLD”は、条件次第で分岐します。",
+      "",
+      "【GO条件（例）】",
+      "・事実が取れている（推測ではない）",
+      "・目標が数字で定義されている",
+      "・制約内で回る最初の1週間の行動が決まっている",
+      "",
+      "【HOLD条件（例）】",
+      "・当事者の本音（離職理由/資金の期限/顧客の反応）が未確認",
+      "・打ち手が大きすぎて実行不能",
+      "",
+      "【次のアクション（おすすめ3つ）】",
+      "1) 当事者/数字の“事実”を取りに行く（30分）",
+      "2) A案/B案の“GO条件/撤退条件”を各3つ書く（15分）",
+      "3) 最初の1週間のタスクを“日割り”にする（10分）",
+      "",
+      "【あなたの危ないポイント】",
+      "・情報が曖昧なまま施策に飛ぶと、誤射で信用と時間を失う",
+      "",
+      "（デモ）このまま続けるなら：『GO条件を3つ具体化して』と送ってください。"
+    ].join("\n");
+
+    // “それっぽさ”を上げるために、入力内容を少し差し込む
+    const inject = [
+      "",
+      "【今回の入力に基づく補足】",
+      a.topic ? `・テーマ：${a.topic}` : null,
+      a.facts ? `・事実：${truncate(a.facts, 140)}` : null,
+      a.goal ? `・目標：${truncate(a.goal, 120)}` : null,
+      a.constraints ? `・制約：${truncate(a.constraints, 120)}` : null,
+    ].filter(Boolean).join("\n");
+
+    return go + inject;
+  }
+
+  if(mode === "hiring"){
+    return [
+      "【完成版（デモ）】",
+      `募集：${a.role || "（職種未確定）"}`,
+      "",
+      "■キャッチ（例）",
+      "「ラクじゃない。でも、本物になれる。」",
+      "",
+      "■仕事内容（必須）",
+      a.must ? "・" + a.must.split("/").map(s=>s.trim()).filter(Boolean).join("\n・") : "・（必須業務を3つ）",
+      "",
+      "■厳しさ（正直に）",
+      a.hardtruth || "（未入力）",
+      "",
+      "■得られるもの",
+      a.reward || "（未入力）",
+      "",
+      "■向いていない人",
+      a.screen ? "・" + a.screen.split("/").map(s=>s.trim()).filter(Boolean).join("\n・") : "・（NGを3つ）",
+      "",
+      "次は：『面接で見極める質問5つ』と送ると、質問リストを出します。"
+    ].join("\n");
+  }
+
+  // SWOT
+  return [
+    "【完成版（デモ）】",
+    "SWOTから“30日で動く”実行案に変換しました。",
+    "",
+    "■最重要：勝ち筋（S×O）を1つに絞る",
+    "・強みを“1つの訴求”にし、1チャネルで検証",
+    "",
+    "■次の30日アクション（例）",
+    "1) 訴求を1つに絞る（顧客の声/事例を棚卸し）",
+    "2) 資産化（提案資料 or LP or 投稿）",
+    "3) 小さく出して数字で残す/捨てる",
+    "",
+    "次は：『勝ち筋を1つに絞って』と送ってください。"
+  ].join("\n");
+}
+
+/* =========================================================
+   Messaging
+========================================================= */
+function sendMessage(){
+  const text = normalize(inputField.value);
+  if(!text) return;
+
+  addMessage("user", text);
+  inputField.value = "";
+  inputField.style.height = "44px";
+
+  // command: summary/final
+  if(text === "まとめて" || text === "まとめ" || text.toLowerCase() === "final"){
+    addTyping();
+    setDisabled(true);
+    setTimeout(()=>{
+      removeTyping();
+      addMessage("ai", buildFinalOutput());
+      renderEndChips();
+      setDisabled(false);
+      inputField.focus();
+    }, 650);
+    return;
+  }
+
+  const flow = FLOWS[currentMode];
+  const st = getState();
+  const step = flow.steps[st.stepIndex];
+
+  // store answer
+  if(step){
+    st.answers[step.key] = text;
+    st.stepIndex = Math.min(st.stepIndex + 1, flow.steps.length);
+  }else{
+    // completed; treat as follow-up
+    st.answers["_followup"] = (st.answers["_followup"] || "") + "\n" + text;
+  }
+
+  updateProgress();
+
+  addTyping();
+  setDisabled(true);
+
+  setTimeout(()=>{
+    removeTyping();
+
+    // If completed flow -> prompt final
+    if(st.stepIndex >= flow.steps.length){
+      const msg = [
+        "必要情報が揃いました。",
+        "",
+        "（このモードのチェック観点）",
+        qualityGateHints(currentMode),
+        "",
+        "最後に“それっぽい構造化アウトプット＋次のアクション”を出します。",
+        "下の『まとめて』を押してください。"
+      ].join("\n");
+      addMessage("ai", msg);
+      renderEndChips();
+      setDisabled(false);
+      inputField.focus();
+      return;
+    }
+
+    // normal step response
+    if(AUTO_SUMMARIZE){
+      let resp = "";
+      if(currentMode === "coach") resp = buildCoachResponse();
+      if(currentMode === "hiring") resp = buildHiringResponse();
+      if(currentMode === "swot") resp = buildSwotResponse();
+      addMessage("ai", resp);
+    }else{
+      addMessage("ai", "OK。次の質問に進みます。");
+    }
+
+    // next question
+    const next = flow.steps[st.stepIndex];
+    addMessage("ai", `【質問】\n${next.question}`);
+
+    renderSuggestions();
+    setDisabled(false);
+    inputField.focus();
+  }, 750);
+}
+
+function renderEndChips(){
+  suggestionArea.innerHTML = "";
+  makeChip({label:"まとめて（結論＋次アクション）", value:"まとめて", cls:"secondary"});
+  makeChip({label:"穴だけ列挙して", value:"穴だけ列挙して", cls:"danger"});
+  makeChip({label:"GO条件を3つ具体化して", value:"GO条件を3つ具体化して", cls:"secondary"});
+}
+
+/* =========================================================
+   Demo auto-run
+========================================================= */
+demoRunBtn.addEventListener("click", async ()=>{
+  // reset and run scenario
+  resetMode(currentMode);
+  renderMode();
+
+  const scenario = DEMO_SCENARIOS[currentMode] || [];
+  for(let i=0; i<scenario.length; i++){
+    await wait(450);
+    inputField.value = scenario[i];
+    inputField.dispatchEvent(new Event("input"));
+    sendMessage();
+    await wait(900);
+  }
+
+  // finish
+  await wait(500);
+  inputField.value = "まとめて";
+  inputField.dispatchEvent(new Event("input"));
+  sendMessage();
+});
+
+function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+/* =========================================================
    Mode switching
-------------------------------*/
+========================================================= */
 document.querySelectorAll(".mode-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     setMode(btn.dataset.mode, btn);
@@ -599,569 +1250,42 @@ exportBtn.addEventListener("click", ()=>{
 
 sendBtn.addEventListener("click", sendMessage);
 
-/* -----------------------------
-   Suggestions
-------------------------------*/
-function renderSuggestions(customChips = null){
-  suggestionArea.innerHTML = "";
-  const st = getState();
-  const flow = FLOWS[currentMode];
-
-  // Priority: step chips > custom chips > seeds
-  let chips = [];
-  if(customChips && customChips.length) chips = customChips;
-  else {
-    const step = flow.steps[st.stepIndex];
-    if(step && step.chips) chips = step.chips;
-    else chips = SUGGESTION_SEEDS[currentMode];
-  }
-
-  chips.forEach(text=>{
-    const chip = document.createElement("div");
-    chip.className = "chip";
-    chip.textContent = text;
-    chip.onclick = ()=> useSuggestion(text);
-    suggestionArea.appendChild(chip);
-  });
-}
-
-function useSuggestion(text){
-  // If chip looks like "採用" etc., we can auto-send to keep Q&A snappy
-  inputField.value = text;
-  inputField.style.height = "auto";
-  inputField.style.height = inputField.scrollHeight + "px";
-
-  // auto-send small chips (single word) to feel chatbot-like
-  if(text.length <= 6){
-    sendMessage();
-  }else{
-    inputField.focus();
-  }
-}
-
-/* -----------------------------
-   Bot brain (heuristics)
-------------------------------*/
-function normalize(text){
-  return text.trim().replace(/\s+/g, " ");
-}
-
-function extractNumbers(text){
-  const nums = text.match(/-?\d+(\.\d+)?/g);
-  return nums ? nums.map(n => Number(n)) : [];
-}
-
-function quickClassifyCoachTopic(text){
-  const t = text.toLowerCase();
-  const map = [
-    {k:["採用","求人","応募","面接"], v:"採用"},
-    {k:["退職","離職","辞め","定着"], v:"離職"},
-    {k:["資金","返済","借入","キャッシュ","銀行"], v:"資金繰り"},
-    {k:["新規","事業","アイデア","サービス","プロダクト"], v:"新規事業"},
-    {k:["営業","提案","受注","商談"], v:"営業"},
-    {k:["時間","忙しい","残業","手が回ら"], v:"時間不足"},
-  ];
-  for(const row of map){
-    if(row.k.some(w => t.includes(w))) return row.v;
-  }
-  return "";
-}
-
-function qualityGateHints(mode){
-  if(mode === "coach"){
-    return [
-      "・事実と解釈が混ざっていないか",
-      "・数字が無いなら“判断できない”が結論になりやすい",
-      "・打ち手が“やりたいこと”止まりで、制約と噛み合っているか"
-    ].join("\n");
-  }
-  if(mode === "hiring"){
-    return [
-      "・“誰でもいい”は誰も刺さらない",
-      "・厳しさは隠すと早期離職になる（採用コストが死ぬ）",
-      "・必須業務を言語化できない会社は、入社後の混乱が起きやすい"
-    ].join("\n");
-  }
-  return [
-    "・S/Wは“内側”、O/Tは“外側”。混ぜると戦略が崩れる",
-    "・SWOTは“打ち手”が出ないと作業で終わる",
-    "・30日で動かせるリソースが無いなら、戦略より優先順位が先"
-  ].join("\n");
-}
-
-function buildCoachReply(userText){
-  const st = getState();
-  const flow = FLOWS.coach;
-  const step = flow.steps[st.stepIndex];
-
-  // store answer
-  st.answers[step.key] = userText;
-
-  // enriched response (not just next question)
-  const summary = buildCoachSummary(st.answers);
-  const critique = buildCoachCritique(st.answers);
-  const blindspots = buildCoachBlindspots(st.answers);
-  const nextQ = nextQuestionText();
-
-  return [
-    "了解。いまの入力を“判断できる形”に寄せます。",
-    "",
-    "【要約＋前提整理】",
-    summary,
-    "",
-    "【良い点（筋が良い／ユニーク）】",
-    critique.good,
-    "",
-    "【問題点・リスク・論理の飛躍】",
-    critique.bad,
-    "",
-    "【見落としがちな前提・盲点】",
-    blindspots,
-    "",
-    "【次の質問】",
-    nextQ
-  ].join("\n");
-}
-
-function buildCoachSummary(a){
-  const parts = [];
-  if(a.topic) parts.push(`・テーマ：${a.topic}`);
-  if(a.situation) parts.push(`・状況（事実）：${truncate(a.situation, 160)}`);
-  if(a.goal) parts.push(`・目標（解決定義）：${truncate(a.goal, 120)}`);
-  if(a.constraints) parts.push(`・制約：${truncate(a.constraints, 120)}`);
-  if(a.options) parts.push(`・打ち手候補：${truncate(a.options, 120)}`);
-  if(a.decision) parts.push(`・決めたいこと：${truncate(a.decision, 100)}`);
-
-  if(parts.length === 0){
-    return "・（まだ材料が少ないので、まず“テーマ”を確定します）";
-  }
-  return parts.join("\n");
-}
-
-function buildCoachCritique(a){
-  // Good = something concrete
-  const hasNumbers = Object.values(a).some(v => (extractNumbers(String(v)).length > 0));
-  const has5w1h = a.situation && /(いつ|誰|どこ|何|なぜ|どう|いつ|どの|いくら)/.test(a.situation);
-  const good = [];
-  if(a.topic) good.push("・テーマが明示されている（ここが曖昧だと壁打ちは成立しない）");
-  if(hasNumbers) good.push("・数字が含まれている（判断が一段ラクになる）");
-  if(has5w1h) good.push("・事実が具体寄り（感情だけだと打ち手が出にくい）");
-  if(!good.length) good.push("・まだ判断材料が少ないが、早めに“テーマ→事実→目標”を揃えれば精度は上がる");
-
-  const bad = [];
-  if(a.goal && !extractNumbers(String(a.goal)).length){
-    bad.push("・目標が定量化されていない：GO判断が“気分”になるリスク");
-  }
-  if(a.options && a.constraints && a.options.length > 0 && a.constraints.length > 0){
-    // heuristic: if constraints mention no time/money, but options mention big initiatives
-    const c = a.constraints;
-    const o = a.options;
-    if((/時間がない|忙しい|人がいない|予算がない/.test(c)) && (/新規|採用|LP|広告|システム|構築|刷新/.test(o))){
-      bad.push("・制約（時間/人/金）と打ち手が噛み合ってない可能性：実行できずに消えるリスク");
-    }
-  }
-  if(a.situation && /たぶん|なんとなく|気がする|かも/.test(a.situation)){
-    bad.push("・“推測”が多い：事実が取れないと対策がズレる（誤射の機会損失）");
-  }
-  if(!bad.length){
-    bad.push("・現時点では致命的な矛盾は未確定。次の質問で“事実/制約/意思決定”を揃えてから叩く。");
-  }
-
-  return { good: good.join("\n"), bad: bad.join("\n") };
-}
-
-function buildCoachBlindspots(a){
-  const b = [];
-  if(a.topic === "離職"){
-    b.push("・離職の原因が“待遇”なのか“人間関係/評価/将来不安”なのかで打ち手が真逆になる");
-    b.push("・退職の兆候（欠勤/成果/態度）と、引き止め可能ライン（何を変えれば残るか）を切り分ける必要");
-  } else if(a.topic === "資金繰り"){
-    b.push("・返済“計画”より、まず資金ショートの期限（何日後に詰むか）と固定費の圧縮余地が最優先");
-    b.push("・売上ではなく“粗利と回収サイト”が資金繰りを殺しているケースが多い");
-  } else if(a.topic === "新規事業"){
-    b.push("・アイデアの良し悪しより、“誰が買うか（Payer）”と“継続利用（運用）”の設計が先");
-    b.push("・最初の検証指標（何が確認できたらGOか）が無いと、永遠に実験が終わらない");
-  } else if(a.topic === "採用"){
-    b.push("・求人票以前に、必須業務の言語化が曖昧だと、採っても定着しない（早期離職コスト）");
-    b.push("・“誰でもOK”に見える訴求は、応募の質が落ちる（面接工数が死ぬ）");
-  } else {
-    b.push("・“決裁者/運用責任者/実利用者”がズレると、正しい施策でも止まる（合意形成の摩擦）");
-    b.push("・いまの悩みが“原因”ではなく“症状”の可能性：根因に触れないと再発する");
-  }
-  b.push("");
-  b.push("（参考：この段階で一番多い失敗は、感情→施策に飛んで、検証ができず消耗すること）");
-  return b.join("\n");
-}
-
-function buildHiringReply(userText){
-  const st = getState();
-  const step = FLOWS.hiring.steps[st.stepIndex];
-  st.answers[step.key] = userText;
-
-  const out = buildHiringOutput(st.answers);
-  return [
-    "OK。いまの入力を“採用で勝つ形”に翻訳します（盛らない）。",
-    "",
-    "【要約＋前提整理】",
-    out.summary,
-    "",
-    "【良い点】",
-    out.good,
-    "",
-    "【問題点・リスク】",
-    out.bad,
-    "",
-    "【ドラフト（仮）】",
-    out.draft,
-    "",
-    "【次の質問】",
-    nextQuestionText()
-  ].join("\n");
-}
-
-function buildHiringOutput(a){
-  const summary = [
-    a.role ? `・職種：${a.role}` : "・職種：未確定",
-    a.must ? `・必須業務：${truncate(a.must, 120)}` : "・必須業務：未入力",
-    a.hardtruth ? `・厳しさ：${truncate(a.hardtruth, 120)}` : "・厳しさ：未入力",
-    a.reward ? `・得られる報酬：${truncate(a.reward, 120)}` : "・報酬：未入力"
-  ].join("\n");
-
-  const good = [];
-  if(a.hardtruth) good.push("・厳しさを言語化できている（ミスマッチ減に直結）");
-  if(a.must) good.push("・必須業務が具体寄りなら、求人票の精度が上がる");
-  if(!good.length) good.push("・まだ材料が少ないが、必須業務が固まれば一気に“刺さる”方向へ寄せられる");
-
-  const bad = [];
-  if(a.role && /なんでも|誰でも|色々/.test(a.role)) bad.push("・職種定義が広すぎる：応募は増えても採用工数が爆増しやすい");
-  if(a.must && a.must.length < 10) bad.push("・必須業務が薄い：入社後に期待ズレ→早期離職の典型パターン");
-  if(!bad.length) bad.push("・現時点では致命傷は未確定。次の質問で“必須業務3つ”を固めるのが最優先。");
-
-  const draft = [
-    a.role ? `【募集】${a.role}` : "【募集】（職種を確定してください）",
-    "",
-    "【一言】",
-    a.hardtruth ? `正直に言うと、${truncate(a.hardtruth, 60)}。それでもやる価値がある人に来てほしい。` : "（厳しさ→価値への翻訳を作ります）",
-    "",
-    "【仕事内容（必須）】",
-    a.must ? `・${a.must.replace(/\n/g, "\n・")}` : "・（必須業務を3つ）",
-    "",
-    "【得られるもの】",
-    a.reward ? `・${a.reward.replace(/\n/g, "\n・")}` : "・（報酬/成長/裁量など）",
-    "",
-    "【向いていない人】",
-    a.screen ? `・${a.screen.replace(/\n/g, "\n・")}` : "・（ミスマッチを3つ）"
-  ].join("\n");
-
-  return { summary, good: good.join("\n"), bad: bad.join("\n"), draft };
-}
-
-function buildSwotReply(userText){
-  const st = getState();
-  const step = FLOWS.swot.steps[st.stepIndex];
-  st.answers[step.key] = userText;
-
-  const out = buildSwotOutput(st.answers);
-  return [
-    "了解。SWOTを“次の一手”に直結させます。",
-    "",
-    "【要約＋前提整理】",
-    out.summary,
-    "",
-    "【良い点】",
-    out.good,
-    "",
-    "【問題点・リスク】",
-    out.bad,
-    "",
-    "【打ち手案（30日で動く形）】",
-    out.actions,
-    "",
-    "【次の質問】",
-    nextQuestionText()
-  ].join("\n");
-}
-
-function buildSwotOutput(a){
-  const summary = [
-    a.biz ? `・事業：${truncate(a.biz, 160)}` : "・事業：未入力",
-    a.strength ? `・S：${truncate(a.strength, 120)}` : "・S：未入力",
-    a.weakness ? `・W：${truncate(a.weakness, 120)}` : "・W：未入力",
-    a.opportunity ? `・O：${truncate(a.opportunity, 120)}` : "・O：未入力",
-    a.threat ? `・T：${truncate(a.threat, 120)}` : "・T：未入力"
-  ].join("\n");
-
-  const good = [];
-  if(a.strength && extractNumbers(String(a.strength)).length) good.push("・Sに数字がある：戦い方が決めやすい");
-  if(a.threat) good.push("・脅威が言語化されている：対策の優先順位が作れる");
-  if(!good.length) good.push("・材料はまだ薄いが、S/W/O/Tを混ぜずに出せば精度は上がる");
-
-  const bad = [];
-  if(a.strength && /市場|景気|円安|競合/.test(a.strength)) bad.push("・Sに外部要因が混ざっている可能性（それはO/T）");
-  if(a.opportunity && /社員|体制|品質|属人/.test(a.opportunity)) bad.push("・Oに内部要因が混ざっている可能性（それはS/W）");
-  if(!bad.length) bad.push("・現時点では致命的矛盾は未確定。次に“30日で動かすリソース”を確定して実行案に落とす。");
-
-  const actions = buildSwotActions(a);
-
-  return { summary, good: good.join("\n"), bad: bad.join("\n"), actions };
-}
-
-function buildSwotActions(a){
-  // Basic TOWS-ish heuristic
-  const acts = [];
-  if(a.strength && a.opportunity){
-    acts.push("① S×O：強みを“露出”させる（強みを外に出す導線/媒体/オファーを作る）");
-  }
-  if(a.weakness && a.opportunity){
-    acts.push("② W×O：弱みを“外注/仕組み化”して機会を取りに行く（全部内製にしない）");
-  }
-  if(a.strength && a.threat){
-    acts.push("③ S×T：強みで“守る”ラインを決める（値下げに付き合わない条件を明文化）");
-  }
-  if(a.weakness && a.threat){
-    acts.push("④ W×T：撤退/縮小を検討（死に筋を切る。資源の温存が先）");
-  }
-
-  const res = a.choice ? a.choice : "";
-  if(res){
-    acts.push("");
-    acts.push("【30日プラン（仮）】");
-    acts.push(`・使えるリソース：${truncate(res, 120)}`);
-    acts.push("・Week1：強み/顧客の声の棚卸し→“勝てる訴求”を1つに絞る");
-    acts.push("・Week2：勝てる訴求でLP/提案資料/投稿のどれか1つを作る（1チャネル集中）");
-    acts.push("・Week3：小さく出す（10件提案/3本投稿/既存客へ案内）→反応計測");
-    acts.push("・Week4：数字で残す/捨てる（伸びた型だけ残す）");
-  } else {
-    acts.push("");
-    acts.push("【次は重要】30日で動かせる時間/予算/人が不明だと、SWOTが“作文”で終わる。");
-  }
-
-  return acts.join("\n");
-}
-
-function truncate(str, n){
-  if(!str) return "";
-  const s = String(str).trim();
-  return s.length > n ? s.slice(0, n) + "…" : s;
-}
-
-function nextQuestionText(){
-  const st = getState();
-  const flow = FLOWS[currentMode];
-
-  // If user hasn't answered current step yet (shouldn't happen), ask it
-  const step = flow.steps[st.stepIndex];
-  if(step) return step.question;
-
-  // Completed flow: generate “final synthesis”
-  return "必要情報が揃いました。ここまでを踏まえて“結論（GO/HOLD/撤退条件）と次の一手”を出します。『まとめて』と送ってください。";
-}
-
-function buildFinalSynthesis(){
-  if(currentMode === "coach"){
-    const a = getState().answers;
-    return [
-      "【最終まとめ】",
-      "ここまでの情報を前提に、判断材料を揃えて結論を出します。",
-      "",
-      "1) いまの考え方で特に危ないポイント",
-      "・感情や推測のまま施策に飛ぶと、誤射で時間と信用を失う",
-      "・目標が定量化されないと、GO基準がブレて“やりっぱなし”になる",
-      "・制約（時間/人/金/権限）と打ち手が噛まないと実行されず自然消滅する",
-      "",
-      "2) 次の一歩（具体アクション）",
-      "・事実（5W1H）を10行で書き出す（推測と分離）",
-      "・30日で確認する指標を1つに絞る（時間削減/粗利/離職など）",
-      "・A案/B案の“GO条件”と“撤退条件”を各3つ書く",
-      "",
-      "（必要なら：そのままコピペで使えるフォーマットも出します）"
-    ].join("\n");
-  }
-
-  if(currentMode === "hiring"){
-    return [
-      "【最終まとめ（採用パック）】",
-      "・求人キャッチ（3案）",
-      "・仕事内容（必須/任せる範囲）",
-      "・向いている人/向いていない人",
-      "・選考の見極め質問（5問）",
-      "",
-      "『まとめて』と送ってください。"
-    ].join("\n");
-  }
-
-  return [
-    "【最終まとめ（SWOT→打ち手）】",
-    "・勝ち筋（S×O）を1つ",
-    "・守り（S×T）のラインを1つ",
-    "・捨てる（W×T）を1つ",
-    "・30日プラン（週次タスク）",
-    "",
-    "『まとめて』と送ってください。"
-  ].join("\n");
-}
-
-/* -----------------------------
-   Main send
-------------------------------*/
-function sendMessage(){
-  const raw = inputField.value;
-  const text = normalize(raw);
-  if(!text) return;
-
-  addMessage("user", text);
-
-  // clear input
-  inputField.value = "";
-  inputField.style.height = "44px";
-
-  // Special commands
-  if(text === "まとめて" || text === "matome" || text === "final"){
-    addTyping();
-    setInputDisabled(true);
-    setTimeout(()=>{
-      removeTyping();
-      addMessage("ai", buildFinalSynthesis());
-      renderSuggestions(["もう一回別の角度で", "前提が弱いところを特定して", "A案/B案を比較して"]);
-      setInputDisabled(false);
-      inputField.focus();
-    }, 650);
-    return;
-  }
-
-  // Step logic
-  const st = getState();
-  const flow = FLOWS[currentMode];
-  const step = flow.steps[st.stepIndex];
-
-  // If first step is topic and user gives free text, try to classify for coach
-  if(currentMode === "coach" && step && step.key === "topic"){
-    const inferred = quickClassifyCoachTopic(text);
-    if(inferred && inferred !== text){
-      // store inferred topic (but keep user's text too in situation if it's longer)
-      st.answers["topic"] = inferred;
-      // If user wrote a long description, also treat it as situation to move faster
-      if(text.length >= 18){
-        st.answers["situation"] = text;
-        st.stepIndex = Math.min(st.stepIndex + 2, flow.steps.length); // skip to goal
-      } else {
-        st.stepIndex = Math.min(st.stepIndex + 1, flow.steps.length);
-      }
-      respondWithModeBrain(text, /*alreadyStored=*/true);
-      return;
-    }
-  }
-
-  // store answer for this step (normal)
-  if(step){
-    // If user tries to answer multiple things at once, still store for current step.
-    st.answers[step.key] = text;
-    st.stepIndex = Math.min(st.stepIndex + 1, flow.steps.length);
-  } else {
-    // no step (shouldn't happen) => keep as note
-    st.answers["note"] = (st.answers["note"] ? st.answers["note"] + "\n" : "") + text;
-  }
-
-  respondWithModeBrain(text, /*alreadyStored=*/true);
-}
-
-function respondWithModeBrain(userText, alreadyStored){
-  addTyping();
-  setInputDisabled(true);
-
-  setTimeout(()=>{
-    removeTyping();
-
-    let response = "";
-    const st = getState();
-    const flow = FLOWS[currentMode];
-
-    // If steps complete, provide synthesis prompt
-    if(st.stepIndex >= flow.steps.length){
-      response = [
-        "必要情報が一通り揃いました。",
-        "",
-        "この時点の注意点：",
-        qualityGateHints(currentMode),
-        "",
-        "ここまでを踏まえて、結論（GO/HOLD/撤退条件）と次の一手を出します。",
-        "『まとめて』と送ってください。"
-      ].join("\n");
-
-      addMessage("ai", response);
-      renderSuggestions(["まとめて", "別の角度で厳しく", "盲点だけ列挙して"]);
-      setInputDisabled(false);
-      inputField.focus();
-      return;
-    }
-
-    // Otherwise: produce “detailed” output + next question
-    if(currentMode === "coach") response = buildCoachReply(userText);
-    if(currentMode === "hiring") response = buildHiringReply(userText);
-    if(currentMode === "swot") response = buildSwotReply(userText);
-
-    addMessage("ai", response);
-
-    // update suggestions: show next step chips
-    const nextStep = flow.steps[st.stepIndex];
-    renderSuggestions(nextStep?.chips || null);
-
-    setInputDisabled(false);
-    inputField.focus();
-  }, 780);
-}
-
-/* -----------------------------
+/* =========================================================
    Render mode
-------------------------------*/
+========================================================= */
 function renderMode(){
-  // clear UI
   chatArea.innerHTML = "";
-
   const flow = FLOWS[currentMode];
   const st = getState();
-
-  // intro
-  addMessage("ai", flow.intro);
-
-  // show quality gate hint as “meta” line (inside AI message)
-  addMessage("ai", [
-    "（このモードのチェック観点）",
-    qualityGateHints(currentMode),
-    "",
-    "では始めます。"
-  ].join("\n"));
-
-  // ask first question
   st.stepIndex = 0;
   st.answers = {};
-  st.transcript = st.transcript || [];
-  addMessage("ai", "【質問】\n" + flow.steps[0].question);
+  st.transcript = [];
 
-  renderSuggestions(flow.steps[0].chips || null);
+  updateProgress();
+
+  addMessage("ai", flow.intro);
+  addMessage("ai", [
+    "（このモードのチェック観点）",
+    qualityGateHints(currentMode)
+  ].join("\n"));
+
+  addMessage("ai", `【質問】\n${flow.steps[0].question}`);
+  renderSuggestions();
 }
 
 function setMode(mode, buttonEl){
   currentMode = mode;
 
-  // toggle active button
   document.querySelectorAll(".mode-btn").forEach(btn=>btn.classList.remove("active"));
   if(buttonEl) buttonEl.classList.add("active");
-  else {
-    // fallback: find by data-mode
-    const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
-    if(btn) btn.classList.add("active");
-  }
 
-  // If mode has never been initialized, keep fresh
-  // Always start with a clean state for demo clarity
   resetMode(mode);
   renderMode();
 }
 
-/* -----------------------------
-   Tiny toast
-------------------------------*/
+/* =========================================================
+   Toast
+========================================================= */
 let toastTimer = null;
 function toast(text){
   let el = document.getElementById("toast");
@@ -1183,16 +1307,15 @@ function toast(text){
   }
   el.textContent = text;
   el.style.opacity = "1";
-
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1200);
 }
 
-/* -----------------------------
+/* =========================================================
    Init
-------------------------------*/
+========================================================= */
 window.addEventListener("load", ()=>{
-  // Start in coach mode safely (no reliance on global `event`)
+  setupSpeech();
   setMode("coach", document.querySelector('.mode-btn[data-mode="coach"]'));
 });
 </script>
