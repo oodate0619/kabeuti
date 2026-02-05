@@ -1,321 +1,1200 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Executive Brain Mirror - Demo Ready</title>
-    <style>
-        /* --- Base Styles --- */
-        :root {
-            --bg-color: #F4F7F6;
-            --card-bg: #FFFFFF;
-            --text-main: #2C3E50;
-            --text-sub: #7F8C8D;
-            --accent-color: #2980B9;
-            --accent-light: #EAF2F8;
-            --border-color: #E0E0E0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Executive Brain Mirror - Q&A Demo</title>
+  <style>
+    :root{
+      --bg:#F4F7F6;
+      --card:#FFFFFF;
+      --text:#2C3E50;
+      --sub:#7F8C8D;
+      --accent:#2980B9;
+      --accent-weak:#EAF2F8;
+      --warn:#E67E22;
+      --border:#E0E0E0;
+      --chip:#EEF6FB;
+      --ai:#F2F4F8;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
+    *{ box-sizing:border-box; }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background-color: var(--card-bg);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+    body{
+      font-family:-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      overflow:hidden;
+    }
 
-        header {
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-            text-align: center;
-            background: #fff;
-        }
-        
-        h1 { font-size: 1.1rem; margin: 0; }
+    .container{
+      width:100%;
+      max-width:680px;
+      background:var(--card);
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      box-shadow:var(--shadow);
+    }
 
-        .mode-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-bottom: 1px solid #eee;
-        }
+    header{
+      padding:14px 16px 10px 16px;
+      border-bottom:1px solid var(--border);
+      background:#fff;
+    }
 
-        .mode-btn {
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            background: #fff;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .mode-btn.active {
-            background: var(--accent-color);
-            color: #fff;
-            border-color: var(--accent-color);
-            box-shadow: 0 2px 5px rgba(41, 128, 185, 0.2);
-        }
+    .top-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
 
-        #chat-area {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+    h1{ font-size:1.05rem; margin:0; }
 
-        .message {
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .top-actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
 
-        .ai { background: #F2F4F8; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .user { background: var(--accent-color); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .small-btn{
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:.82rem;
+      cursor:pointer;
+    }
+    .small-btn:active{ transform:translateY(1px); }
 
-        /* --- 提案チップエリア (新規追加) --- */
-        #suggestion-area {
-            padding: 10px 15px 0 15px;
-            background: #fff;
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* Firefox */
-        }
-        #suggestion-area::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+    .mode-selector{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
 
-        .chip {
-            display: inline-block;
-            padding: 6px 12px;
-            background-color: var(--accent-light);
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            border-radius: 16px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-        
-        .chip:active { background-color: #D4E6F1; }
+    .mode-btn{
+      padding:8px 14px;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:999px;
+      font-size:.85rem;
+      color:var(--sub);
+      cursor:pointer;
+      transition:all .2s;
+      user-select:none;
+    }
 
-        /* 入力エリア */
-        .input-area {
-            padding: 10px 15px 15px 15px; /* 上パディングを減らす */
-            border-top: none; /* チップエリアとの境界を消す */
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+    .mode-btn.active{
+      background:var(--accent);
+      color:#fff;
+      border-color:var(--accent);
+      box-shadow:0 2px 8px rgba(41, 128, 185, 0.18);
+    }
 
-        .voice-guide {
-            font-size: 0.75rem;
-            color: #E67E22;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding-bottom: 5px;
-        }
+    #chat-area{
+      flex:1;
+      padding:14px 14px 10px 14px;
+      overflow-y:auto;
+      background:#fff;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
 
-        .input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
+    .message{
+      max-width:92%;
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:0.95rem;
+      line-height:1.55;
+      animation:fadeIn .25s ease;
+      border:1px solid transparent;
+      word-break:break-word;
+    }
 
-        textarea {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            resize: none;
-            height: 24px;
-            font-size: 16px;
-            line-height: 24px;
-            max-height: 100px;
-            font-family: inherit;
-        }
-        
-        textarea:focus { border-color: var(--accent-color); outline: none; }
+    @keyframes fadeIn{
+      from{ opacity:0; transform:translateY(6px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
 
-        #send-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            background: var(--accent-color);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
+    .ai{
+      background:var(--ai);
+      align-self:flex-start;
+      border-bottom-left-radius:4px;
+      border-color:#E7EBF3;
+    }
+    .user{
+      background:var(--accent);
+      color:#fff;
+      align-self:flex-end;
+      border-bottom-right-radius:4px;
+      border-color:rgba(255,255,255,.18);
+    }
 
-    </style>
+    .meta{
+      font-size:.78rem;
+      color:var(--sub);
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .typing{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:var(--sub);
+      font-size:.85rem;
+    }
+    .dots{
+      display:inline-flex;
+      gap:3px;
+    }
+    .dots span{
+      width:6px;height:6px;border-radius:50%;
+      background: #C7CED6;
+      display:inline-block;
+      animation:bounce 1s infinite;
+    }
+    .dots span:nth-child(2){ animation-delay:.15s; }
+    .dots span:nth-child(3){ animation-delay:.3s; }
+    @keyframes bounce{
+      0%, 80%, 100%{ transform:translateY(0); opacity:.6; }
+      40%{ transform:translateY(-5px); opacity:1; }
+    }
+
+    /* Suggestions / Quick replies */
+    #suggestion-area{
+      padding:10px 12px 0 12px;
+      background:#fff;
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      white-space:nowrap;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      border-top:1px solid #fff;
+    }
+    #suggestion-area::-webkit-scrollbar{ display:none; }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 12px;
+      background:var(--chip);
+      color:var(--accent);
+      border:1px solid rgba(41, 128, 185, .35);
+      border-radius:999px;
+      font-size:0.82rem;
+      cursor:pointer;
+      flex-shrink:0;
+      transition:background .2s, transform .05s;
+      user-select:none;
+    }
+    .chip:active{ background:#DDEDF8; transform:translateY(1px); }
+
+    .input-area{
+      padding:10px 12px 14px 12px;
+      background:#fff;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      border-top:1px solid var(--border);
+    }
+
+    .voice-guide{
+      font-size:0.78rem;
+      color:var(--warn);
+      text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+
+    .input-wrapper{
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+    }
+
+    textarea{
+      flex:1;
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      resize:none;
+      height:44px;
+      font-size:16px;
+      line-height:24px;
+      max-height:160px;
+      font-family:inherit;
+    }
+    textarea:focus{ border-color:var(--accent); outline:none; }
+
+    #send-btn{
+      width:54px;
+      height:54px;
+      border-radius:12px;
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      flex-shrink:0;
+    }
+    #send-btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .hint{
+      font-size:.78rem;
+      color:var(--sub);
+      text-align:center;
+      padding:0 12px 10px 12px;
+      background:#fff;
+    }
+
+    .kbd{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border:1px solid var(--border);
+      border-bottom-width:2px;
+      padding:1px 6px;
+      border-radius:7px;
+      background:#fff;
+      color:var(--text);
+      font-size:.78rem;
+    }
+  </style>
 </head>
-<body>
 
-<div class="container">
+<body>
+  <div class="container">
     <header>
+      <div class="top-row">
         <h1>Executive Brain Mirror</h1>
+        <div class="top-actions">
+          <button class="small-btn" id="export-btn" title="会話をコピー">コピー</button>
+          <button class="small-btn" id="reset-btn" title="このモードを最初から">リセット</button>
+        </div>
+      </div>
+
+      <div class="mode-selector" role="tablist" aria-label="mode selector">
+        <button class="mode-btn active" data-mode="coach">壁打ち</button>
+        <button class="mode-btn" data-mode="hiring">求人票</button>
+        <button class="mode-btn" data-mode="swot">SWOT</button>
+      </div>
     </header>
 
-    <div class="mode-selector">
-        <button class="mode-btn active" onclick="setMode('coach')">壁打ち</button>
-        <button class="mode-btn" onclick="setMode('hiring')">求人票</button>
-        <button class="mode-btn" onclick="setMode('swot')">SWOT</button>
-    </div>
+    <div id="chat-area" aria-live="polite"></div>
 
-    <div id="chat-area">
-        </div>
-
-    <div id="suggestion-area">
-        </div>
+    <div id="suggestion-area" aria-label="suggestions"></div>
 
     <div class="input-area">
-        <div class="voice-guide">
-            <span>💡 キーボードの 🎤 で音声入力も可能です</span>
-        </div>
-        <div class="input-wrapper">
-            <textarea id="user-input" placeholder="ここに入力..." rows="1"></textarea>
-            <button id="send-btn" onclick="sendMessage()">送信</button>
-        </div>
+      <div class="voice-guide"><span>💡 キーボードの 🎤 で音声入力も可能です</span></div>
+      <div class="input-wrapper">
+        <textarea id="user-input" placeholder="ここに入力..." rows="1"></textarea>
+        <button id="send-btn">送信</button>
+      </div>
     </div>
-</div>
+
+    <div class="hint">
+      <span class="kbd">Enter</span> で送信 / <span class="kbd">Shift</span>+<span class="kbd">Enter</span> で改行
+    </div>
+  </div>
 
 <script>
-    // --- データ定義: 各モードの「刺さる」例文 ---
-    const SUGGESTIONS = {
-        coach: [
-            "最近、古株の社員が辞めそうで不安だ",
-            "新しい事業アイデアがあるが自信がない",
-            "銀行への返済計画について相談したい",
-            "とにかく頭がモヤモヤしている"
-        ],
-        hiring: [
-            "給料は高くないが、技術は日本一だ",
-            "残業は多いが、独立できる実力がつく",
-            "未経験でもいいから、ガッツがある奴が欲しい",
-            "右腕になってくれる幹部候補が欲しい"
-        ],
-        swot: [
-            "競合他社が値下げを始めて困っている",
-            "円安で仕入れコストが上がっている",
-            "地元の老舗としてのブランド力はある",
-            "若手の採用がまったくうまくいかない"
-        ]
+/**
+ * 目的：デモでも「一問一答で深掘り」→「整理されたアウトプット」→「次の質問」
+ * 注意：外部APIなし。決め打ちのルール/ヒューリスティックで“それっぽい壁打ち”を実現。
+ */
+
+/* -----------------------------
+   Suggestion seeds
+------------------------------*/
+const SUGGESTION_SEEDS = {
+  coach: [
+    "古株の社員が辞めそうで不安。どう手を打つべき？",
+    "新規事業アイデアがあるが、勝ち筋があるか見てほしい",
+    "資金繰りが厳しい。返済と投資の優先順位を整理したい",
+    "頭がモヤモヤして判断できない。まず整理してほしい",
+    "今の方針で進んでいいか、穴を指摘してほしい"
+  ],
+  hiring: [
+    "給料は高くないが、技術は本物。刺さる言い方にしたい",
+    "残業は多いが、独立できる実力がつく。正直に書きたい",
+    "未経験OK。ガッツある人だけ欲しい。条件を整えたい",
+    "右腕候補を採りたい。何を訴求すべき？",
+    "採用が全然来ない。原因の仮説と打ち手を出して"
+  ],
+  swot: [
+    "競合が値下げを始めた。どう対抗する？",
+    "円安で仕入れコストが上がっている",
+    "地元の老舗としてのブランドはあるが新規が弱い",
+    "若手の採用が全くうまくいかない",
+    "紹介依存から脱したい。打ち手を整理して"
+  ]
+};
+
+/* -----------------------------
+   “一問一答” 深掘り設計（状態機械）
+------------------------------*/
+const FLOWS = {
+  coach: {
+    name: "壁打ち",
+    intro: [
+      "壁打ちモードです。",
+      "ここでは“慰め”じゃなく、**前提の穴・論理の飛躍・盲点**を潰して、判断できる形に整理します。",
+      "",
+      "まずは状況を1〜3行でOK。話せる範囲で書いてください。"
+    ].join("\n"),
+    steps: [
+      {
+        key: "topic",
+        question: "いま一番困っているテーマは何ですか？（例：採用/離職/資金繰り/新規事業/営業/時間不足）",
+        chips: ["採用", "離職", "資金繰り", "新規事業", "営業", "時間不足"]
+      },
+      {
+        key: "situation",
+        question: "起きている事実を、できるだけ具体的に。いつ・どこで・誰が・何が問題？（5W1Hで箇条書きでもOK）",
+        chips: ["直近1週間の事実を書く", "数字（売上/粗利/人員）を書く", "関係者（誰が）を書く"]
+      },
+      {
+        key: "goal",
+        question: "あなたが“解決”と呼べる状態は何ですか？（定量が理想：例：離職ゼロ/残業-20h/月/粗利+◯%）",
+        chips: ["定量目標にする", "期限を決める", "最低ラインを書く"]
+      },
+      {
+        key: "constraints",
+        question: "制約を教えてください。（時間/お金/権限/機密/社内ルール/人材など）",
+        chips: ["時間がない", "予算がない", "権限が弱い", "機密が多い"]
+      },
+      {
+        key: "options",
+        question: "今考えている打ち手（A案/B案でもOK）を全部出してください。やりたくない案も含めて。",
+        chips: ["A案/B案で出す", "現状維持も案に入れる", "最悪の案も書く"]
+      },
+      {
+        key: "decision",
+        question: "最後に確認。あなたは今、何を“決めたい”ですか？（GO/HOLD/撤退/優先順位/次の一手など）",
+        chips: ["GO判断", "HOLD条件", "撤退基準", "優先順位"]
+      }
+    ]
+  },
+
+  hiring: {
+    name: "求人票",
+    intro: [
+      "求人票モードです。",
+      "**“盛る”より“刺さる正直さ”**を作ります。ミスマッチは減らし、応募の質を上げる設計です。",
+      "",
+      "まずは募集職種を教えてください。"
+    ].join("\n"),
+    steps: [
+      {
+        key: "role",
+        question: "募集職種は？（例：現場作業/営業/事務/マネージャー/幹部候補）",
+        chips: ["現場", "営業", "事務", "マネージャー", "幹部候補"]
+      },
+      {
+        key: "must",
+        question: "この人ができないと困る“必須業務”を3つだけ。（抽象NG：例：見積作成/顧客フォロー/現場段取り）",
+        chips: ["必須業務を3つ", "“できる”で書く", "道具/環境も書く"]
+      },
+      {
+        key: "nice",
+        question: "できたら嬉しい“あれば強い”要素は？（経験/資格/性格/価値観）",
+        chips: ["経験", "資格", "性格", "価値観"]
+      },
+      {
+        key: "hardtruth",
+        question: "正直に書くべき“キツい現実”は？（残業/泥臭さ/責任/クレーム/体力など）",
+        chips: ["残業", "責任重い", "クレーム", "体力", "泥臭い"]
+      },
+      {
+        key: "reward",
+        question: "代わりに得られる“報酬”は？（金/成長/裁量/独立/技術/仲間）",
+        chips: ["成長", "裁量", "技術", "独立", "仲間"]
+      },
+      {
+        key: "screen",
+        question: "避けたい人（ミスマッチ）を明確に。NG行動/価値観を3つ。",
+        chips: ["指示待ち", "言い訳が多い", "責任回避", "継続しない"]
+      }
+    ]
+  },
+
+  swot: {
+    name: "SWOT",
+    intro: [
+      "SWOTモードです。",
+      "“それっぽいSWOT”じゃなく、**次の一手に直結**する形に落とします。",
+      "",
+      "まず、あなたの事業（業種/顧客/単価/主力商品）を1〜3行で教えてください。"
+    ].join("\n"),
+    steps: [
+      {
+        key: "biz",
+        question: "事業の概要を教えてください。（誰に/何を/いくらで/どう売っている？）",
+        chips: ["誰に", "何を", "いくら", "どう売る"]
+      },
+      {
+        key: "strength",
+        question: "強み（S）：証拠つきで3つ。（例：リピ率◯%/紹介比率◯%/対応速度/技術）",
+        chips: ["数字で書く", "顧客の声", "競合比較"]
+      },
+      {
+        key: "weakness",
+        question: "弱み（W）：認めたくないやつほど価値あり。3つ。（例：属人化/原価/採用/広告弱い）",
+        chips: ["属人化", "利益薄い", "採用弱い", "広告弱い"]
+      },
+      {
+        key: "opportunity",
+        question: "機会（O）：外部変化で追い風は？（市場/法規制/技術/競合の穴）",
+        chips: ["市場の変化", "技術", "競合の穴", "新チャネル"]
+      },
+      {
+        key: "threat",
+        question: "脅威（T）：無視すると死ぬやつは？（値下げ/原価/人材/規制）",
+        chips: ["値下げ", "原価高騰", "人材不足", "規制"]
+      },
+      {
+        key: "choice",
+        question: "最後に、あなたが次の30日で動かせるリソースは？（時間/予算/人）",
+        chips: ["週◯時間", "予算◯円", "担当者◯人"]
+      }
+    ]
+  }
+};
+
+/* -----------------------------
+   UI refs
+------------------------------*/
+const inputField = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const chatArea = document.getElementById("chat-area");
+const suggestionArea = document.getElementById("suggestion-area");
+const resetBtn = document.getElementById("reset-btn");
+const exportBtn = document.getElementById("export-btn");
+
+/* -----------------------------
+   Conversation State
+------------------------------*/
+let currentMode = "coach";
+let stateByMode = createInitialState();
+
+function createInitialState(){
+  const obj = {};
+  Object.keys(FLOWS).forEach(mode=>{
+    obj[mode] = {
+      stepIndex: 0,
+      answers: {},
+      transcript: [] // {role:'user'|'ai', text:string}
     };
+  });
+  return obj;
+}
 
-    const INTRO_MESSAGES = {
-        coach: "壁打ちモードです。「社員の離職」や「資金繰り」など、誰にも言えない悩みをタップするか、話しかけてください。",
-        hiring: "求人票モードです。「自社の厳しさ」や「求める人物像」を本音で選んでください。魅力的な言葉に翻訳します。",
-        swot: "SWOTモードです。最近気になっている「競合の動き」や「自社の強み」を選んでみてください。"
-    };
+function getState(){
+  return stateByMode[currentMode];
+}
 
-    let currentMode = 'coach';
-    const inputField = document.getElementById('user-input');
-    const chatArea = document.getElementById('chat-area');
-    const suggestionArea = document.getElementById('suggestion-area');
+function resetMode(mode){
+  stateByMode[mode] = { stepIndex: 0, answers:{}, transcript: [] };
+}
 
-    // 初期化
-    window.onload = () => setMode('coach');
+/* -----------------------------
+   Helpers: sanitize + render
+------------------------------*/
+function escapeHtml(str){
+  return str
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
-    // テキストエリアの自動伸縮
-    inputField.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
+function addMessage(sender, text){
+  const div = document.createElement("div");
+  div.className = `message ${sender}`;
+  div.innerHTML = escapeHtml(text).replace(/\n/g,"<br>");
+  chatArea.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
 
-    function setMode(mode) {
-        currentMode = mode;
-        
-        // ボタンのアクティブ化
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        // チャットリセット
-        chatArea.innerHTML = '';
-        addMessage('ai', INTRO_MESSAGES[mode]);
+  // store transcript
+  getState().transcript.push({ role: sender === "ai" ? "ai" : "user", text });
+}
 
-        // 例文チップの更新
-        renderSuggestions(mode);
+function addTyping(){
+  const div = document.createElement("div");
+  div.className = "message ai";
+  div.dataset.typing = "1";
+  div.innerHTML = `
+    <span class="typing">考え中 <span class="dots"><span></span><span></span><span></span></span></span>
+  `;
+  chatArea.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function removeTyping(){
+  const t = chatArea.querySelector('[data-typing="1"]');
+  if(t) t.remove();
+}
+
+function setInputDisabled(disabled){
+  sendBtn.disabled = disabled;
+  inputField.disabled = disabled;
+}
+
+/* -----------------------------
+   Textarea autosize + keybinds
+------------------------------*/
+inputField.addEventListener("input", function(){
+  this.style.height = "auto";
+  this.style.height = (this.scrollHeight) + "px";
+});
+
+inputField.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+/* -----------------------------
+   Mode switching
+------------------------------*/
+document.querySelectorAll(".mode-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    setMode(btn.dataset.mode, btn);
+  });
+});
+
+resetBtn.addEventListener("click", ()=>{
+  resetMode(currentMode);
+  renderMode();
+});
+
+exportBtn.addEventListener("click", ()=>{
+  const t = getState().transcript
+    .map(m => (m.role === "ai" ? "AI: " : "YOU: ") + m.text)
+    .join("\n\n");
+  navigator.clipboard.writeText(t).then(()=>{
+    toast("会話をコピーしました");
+  }).catch(()=>{
+    toast("コピーに失敗しました（ブラウザ権限を確認）");
+  });
+});
+
+sendBtn.addEventListener("click", sendMessage);
+
+/* -----------------------------
+   Suggestions
+------------------------------*/
+function renderSuggestions(customChips = null){
+  suggestionArea.innerHTML = "";
+  const st = getState();
+  const flow = FLOWS[currentMode];
+
+  // Priority: step chips > custom chips > seeds
+  let chips = [];
+  if(customChips && customChips.length) chips = customChips;
+  else {
+    const step = flow.steps[st.stepIndex];
+    if(step && step.chips) chips = step.chips;
+    else chips = SUGGESTION_SEEDS[currentMode];
+  }
+
+  chips.forEach(text=>{
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.textContent = text;
+    chip.onclick = ()=> useSuggestion(text);
+    suggestionArea.appendChild(chip);
+  });
+}
+
+function useSuggestion(text){
+  // If chip looks like "採用" etc., we can auto-send to keep Q&A snappy
+  inputField.value = text;
+  inputField.style.height = "auto";
+  inputField.style.height = inputField.scrollHeight + "px";
+
+  // auto-send small chips (single word) to feel chatbot-like
+  if(text.length <= 6){
+    sendMessage();
+  }else{
+    inputField.focus();
+  }
+}
+
+/* -----------------------------
+   Bot brain (heuristics)
+------------------------------*/
+function normalize(text){
+  return text.trim().replace(/\s+/g, " ");
+}
+
+function extractNumbers(text){
+  const nums = text.match(/-?\d+(\.\d+)?/g);
+  return nums ? nums.map(n => Number(n)) : [];
+}
+
+function quickClassifyCoachTopic(text){
+  const t = text.toLowerCase();
+  const map = [
+    {k:["採用","求人","応募","面接"], v:"採用"},
+    {k:["退職","離職","辞め","定着"], v:"離職"},
+    {k:["資金","返済","借入","キャッシュ","銀行"], v:"資金繰り"},
+    {k:["新規","事業","アイデア","サービス","プロダクト"], v:"新規事業"},
+    {k:["営業","提案","受注","商談"], v:"営業"},
+    {k:["時間","忙しい","残業","手が回ら"], v:"時間不足"},
+  ];
+  for(const row of map){
+    if(row.k.some(w => t.includes(w))) return row.v;
+  }
+  return "";
+}
+
+function qualityGateHints(mode){
+  if(mode === "coach"){
+    return [
+      "・事実と解釈が混ざっていないか",
+      "・数字が無いなら“判断できない”が結論になりやすい",
+      "・打ち手が“やりたいこと”止まりで、制約と噛み合っているか"
+    ].join("\n");
+  }
+  if(mode === "hiring"){
+    return [
+      "・“誰でもいい”は誰も刺さらない",
+      "・厳しさは隠すと早期離職になる（採用コストが死ぬ）",
+      "・必須業務を言語化できない会社は、入社後の混乱が起きやすい"
+    ].join("\n");
+  }
+  return [
+    "・S/Wは“内側”、O/Tは“外側”。混ぜると戦略が崩れる",
+    "・SWOTは“打ち手”が出ないと作業で終わる",
+    "・30日で動かせるリソースが無いなら、戦略より優先順位が先"
+  ].join("\n");
+}
+
+function buildCoachReply(userText){
+  const st = getState();
+  const flow = FLOWS.coach;
+  const step = flow.steps[st.stepIndex];
+
+  // store answer
+  st.answers[step.key] = userText;
+
+  // enriched response (not just next question)
+  const summary = buildCoachSummary(st.answers);
+  const critique = buildCoachCritique(st.answers);
+  const blindspots = buildCoachBlindspots(st.answers);
+  const nextQ = nextQuestionText();
+
+  return [
+    "了解。いまの入力を“判断できる形”に寄せます。",
+    "",
+    "【要約＋前提整理】",
+    summary,
+    "",
+    "【良い点（筋が良い／ユニーク）】",
+    critique.good,
+    "",
+    "【問題点・リスク・論理の飛躍】",
+    critique.bad,
+    "",
+    "【見落としがちな前提・盲点】",
+    blindspots,
+    "",
+    "【次の質問】",
+    nextQ
+  ].join("\n");
+}
+
+function buildCoachSummary(a){
+  const parts = [];
+  if(a.topic) parts.push(`・テーマ：${a.topic}`);
+  if(a.situation) parts.push(`・状況（事実）：${truncate(a.situation, 160)}`);
+  if(a.goal) parts.push(`・目標（解決定義）：${truncate(a.goal, 120)}`);
+  if(a.constraints) parts.push(`・制約：${truncate(a.constraints, 120)}`);
+  if(a.options) parts.push(`・打ち手候補：${truncate(a.options, 120)}`);
+  if(a.decision) parts.push(`・決めたいこと：${truncate(a.decision, 100)}`);
+
+  if(parts.length === 0){
+    return "・（まだ材料が少ないので、まず“テーマ”を確定します）";
+  }
+  return parts.join("\n");
+}
+
+function buildCoachCritique(a){
+  // Good = something concrete
+  const hasNumbers = Object.values(a).some(v => (extractNumbers(String(v)).length > 0));
+  const has5w1h = a.situation && /(いつ|誰|どこ|何|なぜ|どう|いつ|どの|いくら)/.test(a.situation);
+  const good = [];
+  if(a.topic) good.push("・テーマが明示されている（ここが曖昧だと壁打ちは成立しない）");
+  if(hasNumbers) good.push("・数字が含まれている（判断が一段ラクになる）");
+  if(has5w1h) good.push("・事実が具体寄り（感情だけだと打ち手が出にくい）");
+  if(!good.length) good.push("・まだ判断材料が少ないが、早めに“テーマ→事実→目標”を揃えれば精度は上がる");
+
+  const bad = [];
+  if(a.goal && !extractNumbers(String(a.goal)).length){
+    bad.push("・目標が定量化されていない：GO判断が“気分”になるリスク");
+  }
+  if(a.options && a.constraints && a.options.length > 0 && a.constraints.length > 0){
+    // heuristic: if constraints mention no time/money, but options mention big initiatives
+    const c = a.constraints;
+    const o = a.options;
+    if((/時間がない|忙しい|人がいない|予算がない/.test(c)) && (/新規|採用|LP|広告|システム|構築|刷新/.test(o))){
+      bad.push("・制約（時間/人/金）と打ち手が噛み合ってない可能性：実行できずに消えるリスク");
+    }
+  }
+  if(a.situation && /たぶん|なんとなく|気がする|かも/.test(a.situation)){
+    bad.push("・“推測”が多い：事実が取れないと対策がズレる（誤射の機会損失）");
+  }
+  if(!bad.length){
+    bad.push("・現時点では致命的な矛盾は未確定。次の質問で“事実/制約/意思決定”を揃えてから叩く。");
+  }
+
+  return { good: good.join("\n"), bad: bad.join("\n") };
+}
+
+function buildCoachBlindspots(a){
+  const b = [];
+  if(a.topic === "離職"){
+    b.push("・離職の原因が“待遇”なのか“人間関係/評価/将来不安”なのかで打ち手が真逆になる");
+    b.push("・退職の兆候（欠勤/成果/態度）と、引き止め可能ライン（何を変えれば残るか）を切り分ける必要");
+  } else if(a.topic === "資金繰り"){
+    b.push("・返済“計画”より、まず資金ショートの期限（何日後に詰むか）と固定費の圧縮余地が最優先");
+    b.push("・売上ではなく“粗利と回収サイト”が資金繰りを殺しているケースが多い");
+  } else if(a.topic === "新規事業"){
+    b.push("・アイデアの良し悪しより、“誰が買うか（Payer）”と“継続利用（運用）”の設計が先");
+    b.push("・最初の検証指標（何が確認できたらGOか）が無いと、永遠に実験が終わらない");
+  } else if(a.topic === "採用"){
+    b.push("・求人票以前に、必須業務の言語化が曖昧だと、採っても定着しない（早期離職コスト）");
+    b.push("・“誰でもOK”に見える訴求は、応募の質が落ちる（面接工数が死ぬ）");
+  } else {
+    b.push("・“決裁者/運用責任者/実利用者”がズレると、正しい施策でも止まる（合意形成の摩擦）");
+    b.push("・いまの悩みが“原因”ではなく“症状”の可能性：根因に触れないと再発する");
+  }
+  b.push("");
+  b.push("（参考：この段階で一番多い失敗は、感情→施策に飛んで、検証ができず消耗すること）");
+  return b.join("\n");
+}
+
+function buildHiringReply(userText){
+  const st = getState();
+  const step = FLOWS.hiring.steps[st.stepIndex];
+  st.answers[step.key] = userText;
+
+  const out = buildHiringOutput(st.answers);
+  return [
+    "OK。いまの入力を“採用で勝つ形”に翻訳します（盛らない）。",
+    "",
+    "【要約＋前提整理】",
+    out.summary,
+    "",
+    "【良い点】",
+    out.good,
+    "",
+    "【問題点・リスク】",
+    out.bad,
+    "",
+    "【ドラフト（仮）】",
+    out.draft,
+    "",
+    "【次の質問】",
+    nextQuestionText()
+  ].join("\n");
+}
+
+function buildHiringOutput(a){
+  const summary = [
+    a.role ? `・職種：${a.role}` : "・職種：未確定",
+    a.must ? `・必須業務：${truncate(a.must, 120)}` : "・必須業務：未入力",
+    a.hardtruth ? `・厳しさ：${truncate(a.hardtruth, 120)}` : "・厳しさ：未入力",
+    a.reward ? `・得られる報酬：${truncate(a.reward, 120)}` : "・報酬：未入力"
+  ].join("\n");
+
+  const good = [];
+  if(a.hardtruth) good.push("・厳しさを言語化できている（ミスマッチ減に直結）");
+  if(a.must) good.push("・必須業務が具体寄りなら、求人票の精度が上がる");
+  if(!good.length) good.push("・まだ材料が少ないが、必須業務が固まれば一気に“刺さる”方向へ寄せられる");
+
+  const bad = [];
+  if(a.role && /なんでも|誰でも|色々/.test(a.role)) bad.push("・職種定義が広すぎる：応募は増えても採用工数が爆増しやすい");
+  if(a.must && a.must.length < 10) bad.push("・必須業務が薄い：入社後に期待ズレ→早期離職の典型パターン");
+  if(!bad.length) bad.push("・現時点では致命傷は未確定。次の質問で“必須業務3つ”を固めるのが最優先。");
+
+  const draft = [
+    a.role ? `【募集】${a.role}` : "【募集】（職種を確定してください）",
+    "",
+    "【一言】",
+    a.hardtruth ? `正直に言うと、${truncate(a.hardtruth, 60)}。それでもやる価値がある人に来てほしい。` : "（厳しさ→価値への翻訳を作ります）",
+    "",
+    "【仕事内容（必須）】",
+    a.must ? `・${a.must.replace(/\n/g, "\n・")}` : "・（必須業務を3つ）",
+    "",
+    "【得られるもの】",
+    a.reward ? `・${a.reward.replace(/\n/g, "\n・")}` : "・（報酬/成長/裁量など）",
+    "",
+    "【向いていない人】",
+    a.screen ? `・${a.screen.replace(/\n/g, "\n・")}` : "・（ミスマッチを3つ）"
+  ].join("\n");
+
+  return { summary, good: good.join("\n"), bad: bad.join("\n"), draft };
+}
+
+function buildSwotReply(userText){
+  const st = getState();
+  const step = FLOWS.swot.steps[st.stepIndex];
+  st.answers[step.key] = userText;
+
+  const out = buildSwotOutput(st.answers);
+  return [
+    "了解。SWOTを“次の一手”に直結させます。",
+    "",
+    "【要約＋前提整理】",
+    out.summary,
+    "",
+    "【良い点】",
+    out.good,
+    "",
+    "【問題点・リスク】",
+    out.bad,
+    "",
+    "【打ち手案（30日で動く形）】",
+    out.actions,
+    "",
+    "【次の質問】",
+    nextQuestionText()
+  ].join("\n");
+}
+
+function buildSwotOutput(a){
+  const summary = [
+    a.biz ? `・事業：${truncate(a.biz, 160)}` : "・事業：未入力",
+    a.strength ? `・S：${truncate(a.strength, 120)}` : "・S：未入力",
+    a.weakness ? `・W：${truncate(a.weakness, 120)}` : "・W：未入力",
+    a.opportunity ? `・O：${truncate(a.opportunity, 120)}` : "・O：未入力",
+    a.threat ? `・T：${truncate(a.threat, 120)}` : "・T：未入力"
+  ].join("\n");
+
+  const good = [];
+  if(a.strength && extractNumbers(String(a.strength)).length) good.push("・Sに数字がある：戦い方が決めやすい");
+  if(a.threat) good.push("・脅威が言語化されている：対策の優先順位が作れる");
+  if(!good.length) good.push("・材料はまだ薄いが、S/W/O/Tを混ぜずに出せば精度は上がる");
+
+  const bad = [];
+  if(a.strength && /市場|景気|円安|競合/.test(a.strength)) bad.push("・Sに外部要因が混ざっている可能性（それはO/T）");
+  if(a.opportunity && /社員|体制|品質|属人/.test(a.opportunity)) bad.push("・Oに内部要因が混ざっている可能性（それはS/W）");
+  if(!bad.length) bad.push("・現時点では致命的矛盾は未確定。次に“30日で動かすリソース”を確定して実行案に落とす。");
+
+  const actions = buildSwotActions(a);
+
+  return { summary, good: good.join("\n"), bad: bad.join("\n"), actions };
+}
+
+function buildSwotActions(a){
+  // Basic TOWS-ish heuristic
+  const acts = [];
+  if(a.strength && a.opportunity){
+    acts.push("① S×O：強みを“露出”させる（強みを外に出す導線/媒体/オファーを作る）");
+  }
+  if(a.weakness && a.opportunity){
+    acts.push("② W×O：弱みを“外注/仕組み化”して機会を取りに行く（全部内製にしない）");
+  }
+  if(a.strength && a.threat){
+    acts.push("③ S×T：強みで“守る”ラインを決める（値下げに付き合わない条件を明文化）");
+  }
+  if(a.weakness && a.threat){
+    acts.push("④ W×T：撤退/縮小を検討（死に筋を切る。資源の温存が先）");
+  }
+
+  const res = a.choice ? a.choice : "";
+  if(res){
+    acts.push("");
+    acts.push("【30日プラン（仮）】");
+    acts.push(`・使えるリソース：${truncate(res, 120)}`);
+    acts.push("・Week1：強み/顧客の声の棚卸し→“勝てる訴求”を1つに絞る");
+    acts.push("・Week2：勝てる訴求でLP/提案資料/投稿のどれか1つを作る（1チャネル集中）");
+    acts.push("・Week3：小さく出す（10件提案/3本投稿/既存客へ案内）→反応計測");
+    acts.push("・Week4：数字で残す/捨てる（伸びた型だけ残す）");
+  } else {
+    acts.push("");
+    acts.push("【次は重要】30日で動かせる時間/予算/人が不明だと、SWOTが“作文”で終わる。");
+  }
+
+  return acts.join("\n");
+}
+
+function truncate(str, n){
+  if(!str) return "";
+  const s = String(str).trim();
+  return s.length > n ? s.slice(0, n) + "…" : s;
+}
+
+function nextQuestionText(){
+  const st = getState();
+  const flow = FLOWS[currentMode];
+
+  // If user hasn't answered current step yet (shouldn't happen), ask it
+  const step = flow.steps[st.stepIndex];
+  if(step) return step.question;
+
+  // Completed flow: generate “final synthesis”
+  return "必要情報が揃いました。ここまでを踏まえて“結論（GO/HOLD/撤退条件）と次の一手”を出します。『まとめて』と送ってください。";
+}
+
+function buildFinalSynthesis(){
+  if(currentMode === "coach"){
+    const a = getState().answers;
+    return [
+      "【最終まとめ】",
+      "ここまでの情報を前提に、判断材料を揃えて結論を出します。",
+      "",
+      "1) いまの考え方で特に危ないポイント",
+      "・感情や推測のまま施策に飛ぶと、誤射で時間と信用を失う",
+      "・目標が定量化されないと、GO基準がブレて“やりっぱなし”になる",
+      "・制約（時間/人/金/権限）と打ち手が噛まないと実行されず自然消滅する",
+      "",
+      "2) 次の一歩（具体アクション）",
+      "・事実（5W1H）を10行で書き出す（推測と分離）",
+      "・30日で確認する指標を1つに絞る（時間削減/粗利/離職など）",
+      "・A案/B案の“GO条件”と“撤退条件”を各3つ書く",
+      "",
+      "（必要なら：そのままコピペで使えるフォーマットも出します）"
+    ].join("\n");
+  }
+
+  if(currentMode === "hiring"){
+    return [
+      "【最終まとめ（採用パック）】",
+      "・求人キャッチ（3案）",
+      "・仕事内容（必須/任せる範囲）",
+      "・向いている人/向いていない人",
+      "・選考の見極め質問（5問）",
+      "",
+      "『まとめて』と送ってください。"
+    ].join("\n");
+  }
+
+  return [
+    "【最終まとめ（SWOT→打ち手）】",
+    "・勝ち筋（S×O）を1つ",
+    "・守り（S×T）のラインを1つ",
+    "・捨てる（W×T）を1つ",
+    "・30日プラン（週次タスク）",
+    "",
+    "『まとめて』と送ってください。"
+  ].join("\n");
+}
+
+/* -----------------------------
+   Main send
+------------------------------*/
+function sendMessage(){
+  const raw = inputField.value;
+  const text = normalize(raw);
+  if(!text) return;
+
+  addMessage("user", text);
+
+  // clear input
+  inputField.value = "";
+  inputField.style.height = "44px";
+
+  // Special commands
+  if(text === "まとめて" || text === "matome" || text === "final"){
+    addTyping();
+    setInputDisabled(true);
+    setTimeout(()=>{
+      removeTyping();
+      addMessage("ai", buildFinalSynthesis());
+      renderSuggestions(["もう一回別の角度で", "前提が弱いところを特定して", "A案/B案を比較して"]);
+      setInputDisabled(false);
+      inputField.focus();
+    }, 650);
+    return;
+  }
+
+  // Step logic
+  const st = getState();
+  const flow = FLOWS[currentMode];
+  const step = flow.steps[st.stepIndex];
+
+  // If first step is topic and user gives free text, try to classify for coach
+  if(currentMode === "coach" && step && step.key === "topic"){
+    const inferred = quickClassifyCoachTopic(text);
+    if(inferred && inferred !== text){
+      // store inferred topic (but keep user's text too in situation if it's longer)
+      st.answers["topic"] = inferred;
+      // If user wrote a long description, also treat it as situation to move faster
+      if(text.length >= 18){
+        st.answers["situation"] = text;
+        st.stepIndex = Math.min(st.stepIndex + 2, flow.steps.length); // skip to goal
+      } else {
+        st.stepIndex = Math.min(st.stepIndex + 1, flow.steps.length);
+      }
+      respondWithModeBrain(text, /*alreadyStored=*/true);
+      return;
+    }
+  }
+
+  // store answer for this step (normal)
+  if(step){
+    // If user tries to answer multiple things at once, still store for current step.
+    st.answers[step.key] = text;
+    st.stepIndex = Math.min(st.stepIndex + 1, flow.steps.length);
+  } else {
+    // no step (shouldn't happen) => keep as note
+    st.answers["note"] = (st.answers["note"] ? st.answers["note"] + "\n" : "") + text;
+  }
+
+  respondWithModeBrain(text, /*alreadyStored=*/true);
+}
+
+function respondWithModeBrain(userText, alreadyStored){
+  addTyping();
+  setInputDisabled(true);
+
+  setTimeout(()=>{
+    removeTyping();
+
+    let response = "";
+    const st = getState();
+    const flow = FLOWS[currentMode];
+
+    // If steps complete, provide synthesis prompt
+    if(st.stepIndex >= flow.steps.length){
+      response = [
+        "必要情報が一通り揃いました。",
+        "",
+        "この時点の注意点：",
+        qualityGateHints(currentMode),
+        "",
+        "ここまでを踏まえて、結論（GO/HOLD/撤退条件）と次の一手を出します。",
+        "『まとめて』と送ってください。"
+      ].join("\n");
+
+      addMessage("ai", response);
+      renderSuggestions(["まとめて", "別の角度で厳しく", "盲点だけ列挙して"]);
+      setInputDisabled(false);
+      inputField.focus();
+      return;
     }
 
-    function renderSuggestions(mode) {
-        suggestionArea.innerHTML = ''; // クリア
-        SUGGESTIONS[mode].forEach(text => {
-            const chip = document.createElement('div');
-            chip.className = 'chip';
-            chip.innerText = text;
-            chip.onclick = () => useSuggestion(text);
-            suggestionArea.appendChild(chip);
-        });
-    }
+    // Otherwise: produce “detailed” output + next question
+    if(currentMode === "coach") response = buildCoachReply(userText);
+    if(currentMode === "hiring") response = buildHiringReply(userText);
+    if(currentMode === "swot") response = buildSwotReply(userText);
 
-    function useSuggestion(text) {
-        inputField.value = text;
-        inputField.style.height = 'auto'; // 高さ調整
-        inputField.style.height = inputField.scrollHeight + 'px';
-        // オプション: 自動送信したい場合はここで sendMessage() を呼ぶ
-        // sendMessage(); 
-    }
+    addMessage("ai", response);
 
-    function addMessage(sender, text) {
-        const div = document.createElement('div');
-        div.className = `message ${sender}`;
-        div.innerHTML = text.replace(/\n/g, '<br>');
-        chatArea.appendChild(div);
-        chatArea.scrollTop = chatArea.scrollHeight;
-    }
+    // update suggestions: show next step chips
+    const nextStep = flow.steps[st.stepIndex];
+    renderSuggestions(nextStep?.chips || null);
 
-    function sendMessage() {
-        const text = inputField.value.trim();
-        if (!text) return;
+    setInputDisabled(false);
+    inputField.focus();
+  }, 780);
+}
 
-        addMessage('user', text);
-        inputField.value = '';
-        inputField.style.height = '24px';
+/* -----------------------------
+   Render mode
+------------------------------*/
+function renderMode(){
+  // clear UI
+  chatArea.innerHTML = "";
 
-        // 模擬AI応答 (デモ用)
-        setTimeout(() => {
-            let response = "";
-            if (currentMode === 'coach') {
-                response = `「${text.substring(0,10)}...」という悩みですね。\n\nでは一つ質問させてください。\nもし明日、その問題が完全に解決したとしたら、あなたの会社の何が一番変わりますか？`;
-            } else if (currentMode === 'hiring') {
-                response = `その「${text}」という本音こそが差別化になります！\n\n【求人キャッチコピー案】\n『${text}。だからこそ、本物のプロになれる環境があります。』\n\nこのように「厳しさ」を「メリット」に変換すると、覚悟のある良い人材だけが集まります。`;
-            } else if (currentMode === 'swot') {
-                response = `なるほど、「${text}」ですね。\n\nSWOT分析の観点では、それは戦略的な「脅威（Threat）」または「強み（Strength）」になります。\n\nこれに対して、現在打てる手は「価格勝負」と「品質特化」のどちらが現実的でしょうか？`;
-            }
-            addMessage('ai', response);
-        }, 800);
-    }
+  const flow = FLOWS[currentMode];
+  const st = getState();
+
+  // intro
+  addMessage("ai", flow.intro);
+
+  // show quality gate hint as “meta” line (inside AI message)
+  addMessage("ai", [
+    "（このモードのチェック観点）",
+    qualityGateHints(currentMode),
+    "",
+    "では始めます。"
+  ].join("\n"));
+
+  // ask first question
+  st.stepIndex = 0;
+  st.answers = {};
+  st.transcript = st.transcript || [];
+  addMessage("ai", "【質問】\n" + flow.steps[0].question);
+
+  renderSuggestions(flow.steps[0].chips || null);
+}
+
+function setMode(mode, buttonEl){
+  currentMode = mode;
+
+  // toggle active button
+  document.querySelectorAll(".mode-btn").forEach(btn=>btn.classList.remove("active"));
+  if(buttonEl) buttonEl.classList.add("active");
+  else {
+    // fallback: find by data-mode
+    const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
+    if(btn) btn.classList.add("active");
+  }
+
+  // If mode has never been initialized, keep fresh
+  // Always start with a clean state for demo clarity
+  resetMode(mode);
+  renderMode();
+}
+
+/* -----------------------------
+   Tiny toast
+------------------------------*/
+let toastTimer = null;
+function toast(text){
+  let el = document.getElementById("toast");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "toast";
+    el.style.position = "fixed";
+    el.style.left = "50%";
+    el.style.bottom = "18px";
+    el.style.transform = "translateX(-50%)";
+    el.style.background = "rgba(44,62,80,.92)";
+    el.style.color = "#fff";
+    el.style.padding = "10px 12px";
+    el.style.borderRadius = "12px";
+    el.style.fontSize = ".85rem";
+    el.style.zIndex = "9999";
+    el.style.boxShadow = "0 10px 24px rgba(0,0,0,.18)";
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.style.opacity = "1";
+
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1200);
+}
+
+/* -----------------------------
+   Init
+------------------------------*/
+window.addEventListener("load", ()=>{
+  // Start in coach mode safely (no reliance on global `event`)
+  setMode("coach", document.querySelector('.mode-btn[data-mode="coach"]'));
+});
 </script>
 </body>
 </html>
